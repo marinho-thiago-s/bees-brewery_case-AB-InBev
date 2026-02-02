@@ -1,0 +1,141 @@
+[2026-02-02T01:42:57.731+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T01:42:57.737+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.transformation_silver manual__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T01:42:57.740+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.transformation_silver manual__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T01:42:57.740+0000] {taskinstance.py:2856} INFO - Starting attempt 3 of 3
+[2026-02-02T01:42:57.743+0000] {taskinstance.py:2879} INFO - Executing <Task(PythonOperator): transformation_silver> on 2026-02-01 00:00:00+00:00
+[2026-02-02T01:42:57.750+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=2485) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T01:42:57.752+0000] {standard_task_runner.py:72} INFO - Started process 2486 to run task
+[2026-02-02T01:42:57.750+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'transformation_silver', 'manual__2026-02-01T00:00:00+00:00', '--job-id', '23', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmp4wcq69ju']
+[2026-02-02T01:42:57.754+0000] {standard_task_runner.py:105} INFO - Job 23: Subtask transformation_silver
+[2026-02-02T01:42:57.762+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T01:42:57.777+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.transformation_silver manual__2026-02-01T00:00:00+00:00 [running]> on host 7d430775332e
+[2026-02-02T01:42:57.777+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:449 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T01:42:57.803+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='transformation_silver' AIRFLOW_CTX_EXECUTION_DATE='2026-02-01T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='3' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-02-01T00:00:00+00:00'
+[2026-02-02T01:42:57.803+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T01:42:57.810+0000] {bees_brewery_dag.py:65} INFO - Starting transformation job...
+[2026-02-02T01:42:57.810+0000] {bees_brewery_dag.py:68} INFO - Using execution date: 2026-02-01
+[2026-02-02T01:43:00.115+0000] {logging_mixin.py:190} INFO - [2026-02-02 01:43:00] [TransformationJob] [INFO] [TransformationJob] Initialized with execution_date: 2026-02-01
+[2026-02-02T01:43:00.115+0000] {base_job.py:112} INFO - [TransformationJob] Initialized with execution_date: 2026-02-01
+[2026-02-02T01:43:00.116+0000] {logging_mixin.py:190} INFO - [2026-02-02 01:43:00] [TransformationJob] [INFO] [TransformationJob] Starting Silver layer transformation...
+[2026-02-02T01:43:00.116+0000] {base_job.py:112} INFO - [TransformationJob] Starting Silver layer transformation...
+[2026-02-02T01:43:00.431+0000] {logging_mixin.py:190} INFO - [2026-02-02 01:43:00] [TransformationJob] [ERROR] [TransformationJob] ❌ Transformation failed: [PATH_NOT_FOUND] Path does not exist: file:/opt/***/datalake/bronze/breweries/created_at=2026-02-01. SQLSTATE: 42K03
+[2026-02-02T01:43:00.431+0000] {base_job.py:112} ERROR - [TransformationJob] ❌ Transformation failed: [PATH_NOT_FOUND] Path does not exist: file:/opt/***/datalake/bronze/breweries/created_at=2026-02-01. SQLSTATE: 42K03
+[2026-02-02T01:43:00.432+0000] {logging_mixin.py:190} INFO - [2026-02-02 01:43:00] [TransformationJob] [ERROR] [TransformationJob] Job failed with error: [PATH_NOT_FOUND] Path does not exist: file:/opt/***/datalake/bronze/breweries/created_at=2026-02-01. SQLSTATE: 42K03
+[2026-02-02T01:43:00.432+0000] {base_job.py:112} ERROR - [TransformationJob] Job failed with error: [PATH_NOT_FOUND] Path does not exist: file:/opt/***/datalake/bronze/breweries/created_at=2026-02-01. SQLSTATE: 42K03
+[2026-02-02T01:43:00.432+0000] {taskinstance.py:3301} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 767, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 733, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 406, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 238, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 256, in execute_callable
+    return runner.run(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/bees_brewery_dag.py", line 71, in run_transformation
+    job.execute()
+  File "/opt/airflow/spark_jobs/transformation_silver.py", line 26, in execute
+    df = self.storage.read(bronze_path, format="parquet")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/core/storage.py", line 82, in read
+    return spark.read.format(format).load(full_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/pyspark/sql/readwriter.py", line 311, in load
+    return self._df(self._jreader.load(path))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/py4j/java_gateway.py", line 1362, in __call__
+    return_value = get_return_value(
+                   ^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/pyspark/errors/exceptions/captured.py", line 269, in deco
+    raise converted from None
+pyspark.errors.exceptions.captured.AnalysisException: [PATH_NOT_FOUND] Path does not exist: file:/opt/airflow/datalake/bronze/breweries/created_at=2026-02-01. SQLSTATE: 42K03
+[2026-02-02T01:43:00.438+0000] {taskinstance.py:1225} INFO - Marking task as FAILED. dag_id=bees_brewery_medallion, task_id=transformation_silver, run_id=manual__2026-02-01T00:00:00+00:00, execution_date=20260201T000000, start_date=20260202T014257, end_date=20260202T014300
+[2026-02-02T01:43:00.443+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T01:43:00.443+0000] {standard_task_runner.py:124} ERROR - Failed to execute job 23 for task transformation_silver ([PATH_NOT_FOUND] Path does not exist: file:/opt/airflow/datalake/bronze/breweries/created_at=2026-02-01. SQLSTATE: 42K03; 2486)
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/task/task_runner/standard_task_runner.py", line 117, in _start_by_fork
+    ret = args.func(args, dag=self.dag)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/cli.py", line 115, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 483, in task_run
+    task_return_code = _run_task_by_selected_method(args, _dag, ti)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 256, in _run_task_by_selected_method
+    return _run_raw_task(args, ti)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 341, in _run_raw_task
+    return ti._run_raw_task(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/session.py", line 97, in wrapper
+    return func(*args, session=session, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 2995, in _run_raw_task
+    return _run_raw_task(
+           ^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 273, in _run_raw_task
+    TaskInstance._execute_task_with_callbacks(
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3149, in _execute_task_with_callbacks
+    result = self._execute_task(context, task_orig)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3173, in _execute_task
+    return _execute_task(self, context, task_orig)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 767, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 733, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 406, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 238, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 256, in execute_callable
+    return runner.run(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/bees_brewery_dag.py", line 71, in run_transformation
+    job.execute()
+  File "/opt/airflow/spark_jobs/transformation_silver.py", line 26, in execute
+    df = self.storage.read(bronze_path, format="parquet")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/core/storage.py", line 82, in read
+    return spark.read.format(format).load(full_path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/pyspark/sql/readwriter.py", line 311, in load
+    return self._df(self._jreader.load(path))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/py4j/java_gateway.py", line 1362, in __call__
+    return_value = get_return_value(
+                   ^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/pyspark/errors/exceptions/captured.py", line 269, in deco
+    raise converted from None
+pyspark.errors.exceptions.captured.AnalysisException: [PATH_NOT_FOUND] Path does not exist: file:/opt/airflow/datalake/bronze/breweries/created_at=2026-02-01. SQLSTATE: 42K03
+[2026-02-02T01:43:00.479+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 1
+[2026-02-02T01:43:00.492+0000] {taskinstance.py:3891} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T01:43:00.495+0000] {local_task_job_runner.py:240} INFO - ::endgroup::

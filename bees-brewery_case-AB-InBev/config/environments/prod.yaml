@@ -1,0 +1,22 @@
+# Production Environment Configuration
+app_name: "BeesBrewing-Prod"
+
+spark:
+  master: "k8s://https://kubernetes.default.svc:443"
+  memory: "8g"
+  cores: 4
+  additional_config:
+    spark.sql.adaptive.enabled: "true"
+    spark.sql.statistics.histogram.enabled: "true"
+    spark.sql.shuffle.partitions: "200"
+
+storage:
+  type: "s3"
+  path: "s3://my-prod-bucket/datalake"
+  credentials:
+    region: "us-east-1"
+
+api:
+  url: "https://api.openbrewerydb.org/v1/breweries"
+  timeout: 60
+  retry_count: 5

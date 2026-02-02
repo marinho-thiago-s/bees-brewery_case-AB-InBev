@@ -1,0 +1,20 @@
+# Development Environment Configuration
+app_name: "BeesBrewing-Dev"
+
+spark:
+  master: "local[*]"
+  memory: "2g"
+  cores: 2
+  additional_config:
+    spark.sql.adaptive.enabled: "true"
+    spark.sql.shuffle.partitions: "4"
+    spark.driver.host: "127.0.0.1"
+
+storage:
+  type: "local"
+  path: "/opt/airflow/datalake"
+
+api:
+  url: "https://api.openbrewerydb.org/v1/breweries"
+  timeout: 30
+  retry_count: 3

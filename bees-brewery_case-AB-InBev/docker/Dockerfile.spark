@@ -1,0 +1,25 @@
+FROM apache/spark:3.4.1-python3
+
+USER root
+
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar dependências Python adicionais (compatíveis com Python 3.9)
+RUN pip install --upgrade pip && \
+    pip install \
+    pyspark==3.4.1 \
+    pandas==2.0.3 \
+    pyarrow==13.0.0 \
+    requests==2.31.0 \
+    python-dotenv==1.0.0
+
+# Copiar scripts de jobs
+COPY spark_jobs /opt/spark_jobs
+
+WORKDIR /opt/spark_jobs
+
+USER 185

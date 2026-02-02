@@ -1,0 +1,153 @@
+[2026-02-02T00:12:22.543+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T00:12:22.547+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.transformation_silver manual__2026-02-02T00:11:36+00:00 [queued]>
+[2026-02-02T00:12:22.550+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.transformation_silver manual__2026-02-02T00:11:36+00:00 [queued]>
+[2026-02-02T00:12:22.550+0000] {taskinstance.py:2856} INFO - Starting attempt 1 of 3
+[2026-02-02T00:12:22.554+0000] {taskinstance.py:2879} INFO - Executing <Task(PythonOperator): transformation_silver> on 2026-02-02 00:11:36+00:00
+[2026-02-02T00:12:22.557+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=504) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T00:12:22.557+0000] {standard_task_runner.py:72} INFO - Started process 505 to run task
+[2026-02-02T00:12:22.557+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'transformation_silver', 'manual__2026-02-02T00:11:36+00:00', '--job-id', '35', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmp_yl4pfxl']
+[2026-02-02T00:12:22.558+0000] {standard_task_runner.py:105} INFO - Job 35: Subtask transformation_silver
+[2026-02-02T00:12:22.563+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:12:22.572+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.transformation_silver manual__2026-02-02T00:11:36+00:00 [running]> on host 94f5d347c827
+[2026-02-02T00:12:22.595+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='transformation_silver' AIRFLOW_CTX_EXECUTION_DATE='2026-02-02T00:11:36+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-02-02T00:11:36+00:00'
+[2026-02-02T00:12:22.596+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T00:12:22.600+0000] {bees_brewery_dag.py:65} INFO - Starting transformation job...
+[2026-02-02T00:12:24.605+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:12:24] [TransformationJob] [INFO] [TransformationJob] Starting Silver layer transformation...
+[2026-02-02T00:12:24.605+0000] {base_job.py:109} INFO - [TransformationJob] Starting Silver layer transformation...
+[2026-02-02T00:12:25.972+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:12:25] [TransformationJob] [INFO] [TransformationJob] Records read from Bronze: 9930
+[2026-02-02T00:12:25.972+0000] {base_job.py:109} INFO - [TransformationJob] Records read from Bronze: 9930
+[2026-02-02T00:12:26.181+0000] {logging_mixin.py:190} WARNING - {"ts": "2026-02-02 00:12:26.138", "level": "ERROR", "logger": "DataFrameQueryContextLogger", "msg": "[UNRESOLVED_COLUMN.WITH_SUGGESTION] A column, variable, or function parameter with name `id` cannot be resolved. Did you mean one of the following? [`created_at`, `_corrupt_record`]. SQLSTATE: 42703", "context": {"file": "/opt/***/spark_jobs/transformation_silver.py", "line": "28", "fragment": "col", "errorClass": "UNRESOLVED_COLUMN.WITH_SUGGESTION"}, "exception": {"class": "Py4JJavaError", "msg": "An error occurred while calling o42.select.\n: org.apache.spark.sql.AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column, variable, or function parameter with name `id` cannot be resolved. Did you mean one of the following? [`created_at`, `_corrupt_record`]. SQLSTATE: 42703;\n'Project ['id, 'trim('name) AS name#15, 'trim('brewery_type) AS brewery_type#16, 'trim('state_province) AS state#17, 'trim('city) AS city#18, 'trim('country) AS country#19, 'website_url, 'phone, 'ingested_at]\n+- Relation [_corrupt_record#6,created_at#7] json\n\n\tat org.apache.spark.sql.errors.QueryCompilationErrors$.unresolvedAttributeError(QueryCompilationErrors.scala:430)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.org$apache$spark$sql$catalyst$analysis$CheckAnalysis$$failUnresolvedAttribute(CheckAnalysis.scala:166)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$7(CheckAnalysis.scala:406)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$7$adapted(CheckAnalysis.scala:404)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode.foreachUp(TreeNode.scala:273)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$6(CheckAnalysis.scala:404)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$6$adapted(CheckAnalysis.scala:404)\n\tat scala.collection.immutable.List.foreach(List.scala:323)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$2(CheckAnalysis.scala:404)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$2$adapted(CheckAnalysis.scala:281)\n\tat org.apache.spark.sql.catalyst.trees.TreeNode.foreachUp(TreeNode.scala:273)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis0(CheckAnalysis.scala:281)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis0$(CheckAnalysis.scala:252)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer.checkAnalysis0(Analyzer.scala:289)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis(CheckAnalysis.scala:241)\n\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis$(CheckAnalysis.scala:228)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer.checkAnalysis(Analyzer.scala:289)\n\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.$anonfun$resolveInFixedPoint$1(HybridAnalyzer.scala:238)\n\tat scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.scala:18)\n\tat org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:89)\n\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.resolveInFixedPoint(HybridAnalyzer.scala:238)\n\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.$anonfun$apply$1(HybridAnalyzer.scala:91)\n\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.withTrackedAnalyzerBridgeState(HybridAnalyzer.scala:122)\n\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.apply(HybridAnalyzer.scala:84)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer.$anonfun$executeAndCheck$1(Analyzer.scala:322)\n\tat org.apache.spark.sql.catalyst.plans.logical.AnalysisHelper$.markInAnalyzer(AnalysisHelper.scala:423)\n\tat org.apache.spark.sql.catalyst.analysis.Analyzer.executeAndCheck(Analyzer.scala:322)\n\tat org.apache.spark.sql.execution.QueryExecution.$anonfun$lazyAnalyzed$2(QueryExecution.scala:139)\n\tat org.apache.spark.sql.catalyst.QueryPlanningTracker.measurePhase(QueryPlanningTracker.scala:148)\n\tat org.apache.spark.sql.execution.QueryExecution.$anonfun$executePhase$2(QueryExecution.scala:330)\n\tat org.apache.spark.sql.execution.QueryExecution$.withInternalError(QueryExecution.scala:717)\n\tat org.apache.spark.sql.execution.QueryExecution.$anonfun$executePhase$1(QueryExecution.scala:330)\n\tat org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:804)\n\tat org.apache.spark.sql.execution.QueryExecution.executePhase(QueryExecution.scala:329)\n\tat org.apache.spark.sql.execution.QueryExecution.$anonfun$lazyAnalyzed$1(QueryExecution.scala:139)\n\tat scala.util.Try$.apply(Try.scala:217)\n\tat org.apache.spark.util.Utils$.doTryWithCallerStacktrace(Utils.scala:1392)\n\tat org.apache.spark.util.Utils$.getTryWithCallerStacktrace(Utils.scala:1453)\n\tat org.apache.spark.util.LazyTry.get(LazyTry.scala:58)\n\tat org.apache.spark.sql.execution.QueryExecution.analyzed(QueryExecution.scala:150)\n\tat org.apache.spark.sql.execution.QueryExecution.assertAnalyzed(QueryExecution.scala:90)\n\tat org.apache.spark.sql.classic.Dataset$.$anonfun$ofRows$1(Dataset.scala:114)\n\tat org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:804)\n\tat org.apache.spark.sql.classic.Dataset$.ofRows(Dataset.scala:112)\n\tat org.apache.spark.sql.classic.Dataset.withPlan(Dataset.scala:2306)\n\tat org.apache.spark.sql.classic.Dataset.select(Dataset.scala:914)\n\tat org.apache.spark.sql.classic.Dataset.select(Dataset.scala:231)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:569)\n\tat py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)\n\tat py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)\n\tat py4j.Gateway.invoke(Gateway.java:282)\n\tat py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)\n\tat py4j.commands.CallCommand.execute(CallCommand.java:79)\n\tat py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:184)\n\tat py4j.ClientServerConnection.run(ClientServerConnection.java:108)\n\tat java.base/java.lang.Thread.run(Thread.java:840)\n\tSuppressed: org.apache.spark.util.Utils$OriginalTryStackTraceException: Full stacktrace of original doTryWithCallerStacktrace caller\n\t\tat org.apache.spark.sql.errors.QueryCompilationErrors$.unresolvedAttributeError(QueryCompilationErrors.scala:430)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.org$apache$spark$sql$catalyst$analysis$CheckAnalysis$$failUnresolvedAttribute(CheckAnalysis.scala:166)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$7(CheckAnalysis.scala:406)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$7$adapted(CheckAnalysis.scala:404)\n\t\tat org.apache.spark.sql.catalyst.trees.TreeNode.foreachUp(TreeNode.scala:273)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$6(CheckAnalysis.scala:404)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$6$adapted(CheckAnalysis.scala:404)\n\t\tat scala.collection.immutable.List.foreach(List.scala:323)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$2(CheckAnalysis.scala:404)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.$anonfun$checkAnalysis0$2$adapted(CheckAnalysis.scala:281)\n\t\tat org.apache.spark.sql.catalyst.trees.TreeNode.foreachUp(TreeNode.scala:273)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis0(CheckAnalysis.scala:281)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis0$(CheckAnalysis.scala:252)\n\t\tat org.apache.spark.sql.catalyst.analysis.Analyzer.checkAnalysis0(Analyzer.scala:289)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis(CheckAnalysis.scala:241)\n\t\tat org.apache.spark.sql.catalyst.analysis.CheckAnalysis.checkAnalysis$(CheckAnalysis.scala:228)\n\t\tat org.apache.spark.sql.catalyst.analysis.Analyzer.checkAnalysis(Analyzer.scala:289)\n\t\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.$anonfun$resolveInFixedPoint$1(HybridAnalyzer.scala:238)\n\t\tat scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.scala:18)\n\t\tat org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:89)\n\t\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.resolveInFixedPoint(HybridAnalyzer.scala:238)\n\t\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.$anonfun$apply$1(HybridAnalyzer.scala:91)\n\t\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.withTrackedAnalyzerBridgeState(HybridAnalyzer.scala:122)\n\t\tat org.apache.spark.sql.catalyst.analysis.resolver.HybridAnalyzer.apply(HybridAnalyzer.scala:84)\n\t\tat org.apache.spark.sql.catalyst.analysis.Analyzer.$anonfun$executeAndCheck$1(Analyzer.scala:322)\n\t\tat org.apache.spark.sql.catalyst.plans.logical.AnalysisHelper$.markInAnalyzer(AnalysisHelper.scala:423)\n\t\tat org.apache.spark.sql.catalyst.analysis.Analyzer.executeAndCheck(Analyzer.scala:322)\n\t\tat org.apache.spark.sql.execution.QueryExecution.$anonfun$lazyAnalyzed$2(QueryExecution.scala:139)\n\t\tat org.apache.spark.sql.catalyst.QueryPlanningTracker.measurePhase(QueryPlanningTracker.scala:148)\n\t\tat org.apache.spark.sql.execution.QueryExecution.$anonfun$executePhase$2(QueryExecution.scala:330)\n\t\tat org.apache.spark.sql.execution.QueryExecution$.withInternalError(QueryExecution.scala:717)\n\t\tat org.apache.spark.sql.execution.QueryExecution.$anonfun$executePhase$1(QueryExecution.scala:330)\n\t\tat org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:804)\n\t\tat org.apache.spark.sql.execution.QueryExecution.executePhase(QueryExecution.scala:329)\n\t\tat org.apache.spark.sql.execution.QueryExecution.$anonfun$lazyAnalyzed$1(QueryExecution.scala:139)\n\t\tat scala.util.Try$.apply(Try.scala:217)\n\t\tat org.apache.spark.util.Utils$.doTryWithCallerStacktrace(Utils.scala:1392)\n\t\tat org.apache.spark.util.LazyTry.tryT$lzycompute(LazyTry.scala:46)\n\t\tat org.apache.spark.util.LazyTry.tryT(LazyTry.scala:46)\n\t\t... 21 more\n", "stacktrace": [{"class": null, "method": "deco", "file": "/home/***/.local/lib/python3.12/site-packages/pyspark/errors/exceptions/captured.py", "line": "263"}, {"class": null, "method": "get_return_value", "file": "/home/***/.local/lib/python3.12/site-packages/py4j/protocol.py", "line": "327"}]}}
+[2026-02-02T00:12:26.184+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:12:26] [TransformationJob] [ERROR] [TransformationJob] ❌ Transformation failed: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column, variable, or function parameter with name `id` cannot be resolved. Did you mean one of the following? [`created_at`, `_corrupt_record`]. SQLSTATE: 42703;
+'Project ['id, 'trim('name) AS name#15, 'trim('brewery_type) AS brewery_type#16, 'trim('state_province) AS state#17, 'trim('city) AS city#18, 'trim('country) AS country#19, 'website_url, 'phone, 'ingested_at]
++- Relation [_corrupt_record#6,created_at#7] json
+[2026-02-02T00:12:26.184+0000] {base_job.py:109} ERROR - [TransformationJob] ❌ Transformation failed: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column, variable, or function parameter with name `id` cannot be resolved. Did you mean one of the following? [`created_at`, `_corrupt_record`]. SQLSTATE: 42703;
+'Project ['id, 'trim('name) AS name#15, 'trim('brewery_type) AS brewery_type#16, 'trim('state_province) AS state#17, 'trim('city) AS city#18, 'trim('country) AS country#19, 'website_url, 'phone, 'ingested_at]
++- Relation [_corrupt_record#6,created_at#7] json
+
+[2026-02-02T00:12:26.184+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:12:26] [TransformationJob] [ERROR] [TransformationJob] Job failed with error: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column, variable, or function parameter with name `id` cannot be resolved. Did you mean one of the following? [`created_at`, `_corrupt_record`]. SQLSTATE: 42703;
+'Project ['id, 'trim('name) AS name#15, 'trim('brewery_type) AS brewery_type#16, 'trim('state_province) AS state#17, 'trim('city) AS city#18, 'trim('country) AS country#19, 'website_url, 'phone, 'ingested_at]
++- Relation [_corrupt_record#6,created_at#7] json
+[2026-02-02T00:12:26.184+0000] {base_job.py:109} ERROR - [TransformationJob] Job failed with error: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column, variable, or function parameter with name `id` cannot be resolved. Did you mean one of the following? [`created_at`, `_corrupt_record`]. SQLSTATE: 42703;
+'Project ['id, 'trim('name) AS name#15, 'trim('brewery_type) AS brewery_type#16, 'trim('state_province) AS state#17, 'trim('city) AS city#18, 'trim('country) AS country#19, 'website_url, 'phone, 'ingested_at]
++- Relation [_corrupt_record#6,created_at#7] json
+
+[2026-02-02T00:12:26.185+0000] {taskinstance.py:3301} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 767, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 733, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 406, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 238, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 256, in execute_callable
+    return runner.run(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/bees_brewery_dag.py", line 67, in run_transformation
+    job.execute()
+  File "/opt/airflow/spark_jobs/transformation_silver.py", line 27, in execute
+    df_silver = df.select(
+                ^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/pyspark/sql/classic/dataframe.py", line 1015, in select
+    jdf = self._jdf.select(self._jcols(*cols))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/py4j/java_gateway.py", line 1362, in __call__
+    return_value = get_return_value(
+                   ^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/pyspark/errors/exceptions/captured.py", line 269, in deco
+    raise converted from None
+pyspark.errors.exceptions.captured.AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column, variable, or function parameter with name `id` cannot be resolved. Did you mean one of the following? [`created_at`, `_corrupt_record`]. SQLSTATE: 42703;
+'Project ['id, 'trim('name) AS name#15, 'trim('brewery_type) AS brewery_type#16, 'trim('state_province) AS state#17, 'trim('city) AS city#18, 'trim('country) AS country#19, 'website_url, 'phone, 'ingested_at]
++- Relation [_corrupt_record#6,created_at#7] json
+
+[2026-02-02T00:12:26.193+0000] {taskinstance.py:1225} INFO - Marking task as UP_FOR_RETRY. dag_id=bees_brewery_medallion, task_id=transformation_silver, run_id=manual__2026-02-02T00:11:36+00:00, execution_date=20260202T001136, start_date=20260202T001222, end_date=20260202T001226
+[2026-02-02T00:12:26.200+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T00:12:26.200+0000] {standard_task_runner.py:124} ERROR - Failed to execute job 35 for task transformation_silver ([UNRESOLVED_COLUMN.WITH_SUGGESTION] A column, variable, or function parameter with name `id` cannot be resolved. Did you mean one of the following? [`created_at`, `_corrupt_record`]. SQLSTATE: 42703;
+'Project ['id, 'trim('name) AS name#15, 'trim('brewery_type) AS brewery_type#16, 'trim('state_province) AS state#17, 'trim('city) AS city#18, 'trim('country) AS country#19, 'website_url, 'phone, 'ingested_at]
++- Relation [_corrupt_record#6,created_at#7] json
+; 505)
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/task/task_runner/standard_task_runner.py", line 117, in _start_by_fork
+    ret = args.func(args, dag=self.dag)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/cli.py", line 115, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 483, in task_run
+    task_return_code = _run_task_by_selected_method(args, _dag, ti)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 256, in _run_task_by_selected_method
+    return _run_raw_task(args, ti)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 341, in _run_raw_task
+    return ti._run_raw_task(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/session.py", line 97, in wrapper
+    return func(*args, session=session, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 2995, in _run_raw_task
+    return _run_raw_task(
+           ^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 273, in _run_raw_task
+    TaskInstance._execute_task_with_callbacks(
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3149, in _execute_task_with_callbacks
+    result = self._execute_task(context, task_orig)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3173, in _execute_task
+    return _execute_task(self, context, task_orig)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 767, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 733, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 406, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 238, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 256, in execute_callable
+    return runner.run(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/bees_brewery_dag.py", line 67, in run_transformation
+    job.execute()
+  File "/opt/airflow/spark_jobs/transformation_silver.py", line 27, in execute
+    df_silver = df.select(
+                ^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/pyspark/sql/classic/dataframe.py", line 1015, in select
+    jdf = self._jdf.select(self._jcols(*cols))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/py4j/java_gateway.py", line 1362, in __call__
+    return_value = get_return_value(
+                   ^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/pyspark/errors/exceptions/captured.py", line 269, in deco
+    raise converted from None
+pyspark.errors.exceptions.captured.AnalysisException: [UNRESOLVED_COLUMN.WITH_SUGGESTION] A column, variable, or function parameter with name `id` cannot be resolved. Did you mean one of the following? [`created_at`, `_corrupt_record`]. SQLSTATE: 42703;
+'Project ['id, 'trim('name) AS name#15, 'trim('brewery_type) AS brewery_type#16, 'trim('state_province) AS state#17, 'trim('city) AS city#18, 'trim('country) AS country#19, 'website_url, 'phone, 'ingested_at]
++- Relation [_corrupt_record#6,created_at#7] json
+
+[2026-02-02T00:12:26.241+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 1
+[2026-02-02T00:12:26.250+0000] {taskinstance.py:3891} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T00:12:26.251+0000] {local_task_job_runner.py:240} INFO - ::endgroup::

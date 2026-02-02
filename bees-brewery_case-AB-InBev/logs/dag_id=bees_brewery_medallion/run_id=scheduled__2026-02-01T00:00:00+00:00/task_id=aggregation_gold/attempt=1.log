@@ -1,0 +1,62 @@
+[2026-02-02T00:06:45.714+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T00:06:45.719+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.aggregation_gold scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:06:45.722+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.aggregation_gold scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:06:45.722+0000] {taskinstance.py:2856} INFO - Starting attempt 1 of 3
+[2026-02-02T00:06:45.727+0000] {taskinstance.py:2879} INFO - Executing <Task(PythonOperator): aggregation_gold> on 2026-02-01 00:00:00+00:00
+[2026-02-02T00:06:45.731+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=1959) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T00:06:45.732+0000] {standard_task_runner.py:72} INFO - Started process 1960 to run task
+[2026-02-02T00:06:45.731+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'aggregation_gold', 'scheduled__2026-02-01T00:00:00+00:00', '--job-id', '24', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmpf_3bc4qk']
+[2026-02-02T00:06:45.734+0000] {standard_task_runner.py:105} INFO - Job 24: Subtask aggregation_gold
+[2026-02-02T00:06:45.739+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:06:45.755+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.aggregation_gold scheduled__2026-02-01T00:00:00+00:00 [running]> on host 94f5d347c827
+[2026-02-02T00:06:45.756+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:449 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:06:45.782+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='aggregation_gold' AIRFLOW_CTX_EXECUTION_DATE='2026-02-01T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-01T00:00:00+00:00'
+[2026-02-02T00:06:45.782+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T00:06:45.787+0000] {bees_brewery_dag.py:71} INFO - Starting aggregation job...
+[2026-02-02T00:06:47.903+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:06:47] [AggregationJob] [INFO] [AggregationJob] Starting Gold layer aggregation...
+[2026-02-02T00:06:47.903+0000] {base_job.py:109} INFO - [AggregationJob] Starting Gold layer aggregation...
+[2026-02-02T00:06:49.283+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:06:49] [AggregationJob] [INFO] [AggregationJob] Records read from Silver: 9083
+[2026-02-02T00:06:49.283+0000] {base_job.py:109} INFO - [AggregationJob] Records read from Silver: 9083
+[2026-02-02T00:06:49.691+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:06:49] [AggregationJob] [INFO] [AggregationJob] Aggregated groups: 449
+[2026-02-02T00:06:49.691+0000] {base_job.py:109} INFO - [AggregationJob] Aggregated groups: 449
+[2026-02-02T00:06:50.183+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:06:50] [AggregationJob] [INFO] [AggregationJob] ✅ Aggregation completed! 449 groups written to gold/breweries_agg
+[2026-02-02T00:06:50.183+0000] {base_job.py:109} INFO - [AggregationJob] ✅ Aggregation completed! 449 groups written to gold/breweries_agg
+[2026-02-02T00:06:50.184+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:06:50] [AggregationJob] [INFO] [AggregationJob] Job completed successfully
+[2026-02-02T00:06:50.184+0000] {base_job.py:109} INFO - [AggregationJob] Job completed successfully
+[2026-02-02T00:06:50.185+0000] {python.py:240} INFO - Done. Returned value was: None
+[2026-02-02T00:06:50.197+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T00:06:50.197+0000] {taskinstance.py:352} INFO - Marking task as SUCCESS. dag_id=bees_brewery_medallion, task_id=aggregation_gold, run_id=scheduled__2026-02-01T00:00:00+00:00, execution_date=20260201T000000, start_date=20260202T000645, end_date=20260202T000650
+[2026-02-02T00:06:50.242+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 0
+[2026-02-02T00:06:50.263+0000] {taskinstance.py:3891} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T00:06:50.268+0000] {local_task_job_runner.py:240} INFO - ::endgroup::
+[2026-02-02T00:50:39.484+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T00:50:39.497+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.aggregation_gold scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:50:39.501+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.aggregation_gold scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:50:39.501+0000] {taskinstance.py:2856} INFO - Starting attempt 1 of 3
+[2026-02-02T00:50:39.509+0000] {taskinstance.py:2879} INFO - Executing <Task(PythonOperator): aggregation_gold> on 2026-02-01 00:00:00+00:00
+[2026-02-02T00:50:39.513+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=3386) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T00:50:39.514+0000] {standard_task_runner.py:72} INFO - Started process 3472 to run task
+[2026-02-02T00:50:39.514+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'aggregation_gold', 'scheduled__2026-02-01T00:00:00+00:00', '--job-id', '12', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmpr8fus90h']
+[2026-02-02T00:50:39.517+0000] {standard_task_runner.py:105} INFO - Job 12: Subtask aggregation_gold
+[2026-02-02T00:50:39.526+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:50:39.552+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.aggregation_gold scheduled__2026-02-01T00:00:00+00:00 [running]> on host babc5ef10f8b
+[2026-02-02T00:50:39.553+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:449 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:50:39.596+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='aggregation_gold' AIRFLOW_CTX_EXECUTION_DATE='2026-02-01T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-01T00:00:00+00:00'
+[2026-02-02T00:50:39.597+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T00:50:39.604+0000] {bees_brewery_dag.py:71} INFO - Starting aggregation job...
+[2026-02-02T00:50:42.371+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:50:42] [AggregationJob] [INFO] [AggregationJob] Starting Gold layer aggregation...
+[2026-02-02T00:50:42.371+0000] {base_job.py:109} INFO - [AggregationJob] Starting Gold layer aggregation...
+[2026-02-02T00:50:44.101+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:50:44] [AggregationJob] [INFO] [AggregationJob] Records read from Silver: 9083
+[2026-02-02T00:50:44.101+0000] {base_job.py:109} INFO - [AggregationJob] Records read from Silver: 9083
+[2026-02-02T00:50:44.757+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:50:44] [AggregationJob] [INFO] [AggregationJob] Aggregated groups: 449
+[2026-02-02T00:50:44.756+0000] {base_job.py:109} INFO - [AggregationJob] Aggregated groups: 449
+[2026-02-02T00:50:45.330+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:50:45] [AggregationJob] [INFO] [AggregationJob] ✅ Aggregation completed! 449 groups written to gold/breweries_agg
+[2026-02-02T00:50:45.330+0000] {base_job.py:109} INFO - [AggregationJob] ✅ Aggregation completed! 449 groups written to gold/breweries_agg
+[2026-02-02T00:50:45.331+0000] {logging_mixin.py:190} INFO - [2026-02-02 00:50:45] [AggregationJob] [INFO] [AggregationJob] Job completed successfully
+[2026-02-02T00:50:45.331+0000] {base_job.py:109} INFO - [AggregationJob] Job completed successfully
+[2026-02-02T00:50:45.332+0000] {python.py:240} INFO - Done. Returned value was: None
+[2026-02-02T00:50:45.341+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T00:50:45.341+0000] {taskinstance.py:352} INFO - Marking task as SUCCESS. dag_id=bees_brewery_medallion, task_id=aggregation_gold, run_id=scheduled__2026-02-01T00:00:00+00:00, execution_date=20260201T000000, start_date=20260202T005039, end_date=20260202T005045
+[2026-02-02T00:50:45.398+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 0
+[2026-02-02T00:50:45.413+0000] {taskinstance.py:3891} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T00:50:45.414+0000] {local_task_job_runner.py:240} INFO - ::endgroup::

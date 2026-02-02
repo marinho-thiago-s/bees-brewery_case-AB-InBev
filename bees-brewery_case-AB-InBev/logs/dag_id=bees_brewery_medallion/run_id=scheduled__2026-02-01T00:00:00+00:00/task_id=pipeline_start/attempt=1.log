@@ -1,0 +1,144 @@
+[2026-02-02T00:00:01.373+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T00:00:01.380+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:00:01.382+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:00:01.383+0000] {taskinstance.py:2856} INFO - Starting attempt 1 of 3
+[2026-02-02T00:00:01.386+0000] {taskinstance.py:2879} INFO - Executing <Task(BashOperator): pipeline_start> on 2026-02-01 00:00:00+00:00
+[2026-02-02T00:00:01.390+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=175) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T00:00:01.391+0000] {standard_task_runner.py:72} INFO - Started process 179 to run task
+[2026-02-02T00:00:01.391+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'pipeline_start', 'scheduled__2026-02-01T00:00:00+00:00', '--job-id', '9', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmpn5jimk02']
+[2026-02-02T00:00:01.393+0000] {standard_task_runner.py:105} INFO - Job 9: Subtask pipeline_start
+[2026-02-02T00:00:01.399+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:00:01.415+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [running]> on host 94f5d347c827
+[2026-02-02T00:00:01.416+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:449 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:00:01.445+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='pipeline_start' AIRFLOW_CTX_EXECUTION_DATE='2026-02-01T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-01T00:00:00+00:00'
+[2026-02-02T00:00:01.445+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T00:00:01.450+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-02-02T00:00:01.451+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', 'echo "Starting BEES Brewery Pipeline at $(date)"']
+[2026-02-02T00:00:01.454+0000] {subprocess.py:86} INFO - Output:
+[2026-02-02T00:00:01.455+0000] {subprocess.py:93} INFO - Starting BEES Brewery Pipeline at Mon Feb  2 00:00:01 UTC 2026
+[2026-02-02T00:00:01.455+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2026-02-02T00:00:01.463+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T00:00:01.463+0000] {taskinstance.py:352} INFO - Marking task as SUCCESS. dag_id=bees_brewery_medallion, task_id=pipeline_start, run_id=scheduled__2026-02-01T00:00:00+00:00, execution_date=20260201T000000, start_date=20260202T000001, end_date=20260202T000001
+[2026-02-02T00:00:01.491+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 0
+[2026-02-02T00:00:01.504+0000] {taskinstance.py:3891} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T00:00:01.505+0000] {local_task_job_runner.py:240} INFO - ::endgroup::
+[2026-02-02T00:18:10.991+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T00:18:10.998+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:18:11.001+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:18:11.001+0000] {taskinstance.py:2856} INFO - Starting attempt 1 of 3
+[2026-02-02T00:18:11.008+0000] {taskinstance.py:2879} INFO - Executing <Task(BashOperator): pipeline_start> on 2026-02-01 00:00:00+00:00
+[2026-02-02T00:18:11.012+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=227) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T00:18:11.012+0000] {standard_task_runner.py:72} INFO - Started process 228 to run task
+[2026-02-02T00:18:11.012+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'pipeline_start', 'scheduled__2026-02-01T00:00:00+00:00', '--job-id', '2', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmpv7_8myud']
+[2026-02-02T00:18:11.013+0000] {standard_task_runner.py:105} INFO - Job 2: Subtask pipeline_start
+[2026-02-02T00:18:11.022+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:18:11.034+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [running]> on host 0db9e973f724
+[2026-02-02T00:18:11.035+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:449 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:18:11.083+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='pipeline_start' AIRFLOW_CTX_EXECUTION_DATE='2026-02-01T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-01T00:00:00+00:00'
+[2026-02-02T00:18:11.084+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T00:18:11.097+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-02-02T00:18:11.098+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', 'echo "Starting BEES Brewery Pipeline at $(date)"']
+[2026-02-02T00:18:11.101+0000] {subprocess.py:86} INFO - Output:
+[2026-02-02T00:18:11.104+0000] {subprocess.py:93} INFO - Starting BEES Brewery Pipeline at Mon Feb  2 00:18:11 UTC 2026
+[2026-02-02T00:18:11.104+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2026-02-02T00:18:11.112+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T00:18:11.112+0000] {taskinstance.py:352} INFO - Marking task as SUCCESS. dag_id=bees_brewery_medallion, task_id=pipeline_start, run_id=scheduled__2026-02-01T00:00:00+00:00, execution_date=20260201T000000, start_date=20260202T001810, end_date=20260202T001811
+[2026-02-02T00:18:11.151+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 0
+[2026-02-02T00:18:11.161+0000] {taskinstance.py:3891} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T00:18:11.162+0000] {local_task_job_runner.py:240} INFO - ::endgroup::
+[2026-02-02T00:32:49.785+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T00:32:49.804+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:32:49.809+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:32:49.809+0000] {taskinstance.py:2856} INFO - Starting attempt 1 of 3
+[2026-02-02T00:32:49.814+0000] {taskinstance.py:2879} INFO - Executing <Task(BashOperator): pipeline_start> on 2026-02-01 00:00:00+00:00
+[2026-02-02T00:32:49.819+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=582) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T00:32:49.820+0000] {standard_task_runner.py:72} INFO - Started process 585 to run task
+[2026-02-02T00:32:49.821+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'pipeline_start', 'scheduled__2026-02-01T00:00:00+00:00', '--job-id', '3', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmpwahrevzb']
+[2026-02-02T00:32:49.822+0000] {standard_task_runner.py:105} INFO - Job 3: Subtask pipeline_start
+[2026-02-02T00:32:49.830+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:32:49.847+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [running]> on host 41608150ebbf
+[2026-02-02T00:32:49.848+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:449 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:32:49.880+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='pipeline_start' AIRFLOW_CTX_EXECUTION_DATE='2026-02-01T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-01T00:00:00+00:00'
+[2026-02-02T00:32:49.881+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T00:32:49.887+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-02-02T00:32:49.888+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', 'echo "Starting BEES Brewery Pipeline at $(date)"']
+[2026-02-02T00:32:49.893+0000] {subprocess.py:86} INFO - Output:
+[2026-02-02T00:32:49.896+0000] {subprocess.py:93} INFO - Starting BEES Brewery Pipeline at Mon Feb  2 00:32:49 UTC 2026
+[2026-02-02T00:32:49.896+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2026-02-02T00:32:49.908+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T00:32:49.908+0000] {taskinstance.py:352} INFO - Marking task as SUCCESS. dag_id=bees_brewery_medallion, task_id=pipeline_start, run_id=scheduled__2026-02-01T00:00:00+00:00, execution_date=20260201T000000, start_date=20260202T003249, end_date=20260202T003249
+[2026-02-02T00:32:49.917+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 0
+[2026-02-02T00:32:49.932+0000] {taskinstance.py:3891} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T00:32:49.933+0000] {local_task_job_runner.py:240} INFO - ::endgroup::
+[2026-02-02T00:38:11.721+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T00:38:11.726+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:38:11.728+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:38:11.728+0000] {taskinstance.py:2856} INFO - Starting attempt 1 of 3
+[2026-02-02T00:38:11.733+0000] {taskinstance.py:2879} INFO - Executing <Task(BashOperator): pipeline_start> on 2026-02-01 00:00:00+00:00
+[2026-02-02T00:38:11.736+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=198) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T00:38:11.736+0000] {standard_task_runner.py:72} INFO - Started process 199 to run task
+[2026-02-02T00:38:11.736+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'pipeline_start', 'scheduled__2026-02-01T00:00:00+00:00', '--job-id', '2', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmps42cgn8i']
+[2026-02-02T00:38:11.738+0000] {standard_task_runner.py:105} INFO - Job 2: Subtask pipeline_start
+[2026-02-02T00:38:11.748+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:38:11.764+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [running]> on host babc5ef10f8b
+[2026-02-02T00:38:11.765+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:449 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:38:11.797+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='pipeline_start' AIRFLOW_CTX_EXECUTION_DATE='2026-02-01T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-01T00:00:00+00:00'
+[2026-02-02T00:38:11.797+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T00:38:11.809+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-02-02T00:38:11.810+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', 'echo "Starting BEES Brewery Pipeline at $(date)"']
+[2026-02-02T00:38:11.814+0000] {subprocess.py:86} INFO - Output:
+[2026-02-02T00:38:11.816+0000] {subprocess.py:93} INFO - Starting BEES Brewery Pipeline at Mon Feb  2 00:38:11 UTC 2026
+[2026-02-02T00:38:11.816+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2026-02-02T00:38:11.826+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T00:38:11.826+0000] {taskinstance.py:352} INFO - Marking task as SUCCESS. dag_id=bees_brewery_medallion, task_id=pipeline_start, run_id=scheduled__2026-02-01T00:00:00+00:00, execution_date=20260201T000000, start_date=20260202T003811, end_date=20260202T003811
+[2026-02-02T00:38:11.837+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 0
+[2026-02-02T00:38:11.846+0000] {taskinstance.py:3891} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T00:38:11.847+0000] {local_task_job_runner.py:240} INFO - ::endgroup::
+[2026-02-02T00:56:54.427+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T00:56:54.432+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:56:54.435+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T00:56:54.435+0000] {taskinstance.py:2856} INFO - Starting attempt 1 of 3
+[2026-02-02T00:56:54.439+0000] {taskinstance.py:2879} INFO - Executing <Task(BashOperator): pipeline_start> on 2026-02-01 00:00:00+00:00
+[2026-02-02T00:56:54.442+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=199) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T00:56:54.442+0000] {standard_task_runner.py:72} INFO - Started process 202 to run task
+[2026-02-02T00:56:54.442+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'pipeline_start', 'scheduled__2026-02-01T00:00:00+00:00', '--job-id', '2', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmpd8du1p1v']
+[2026-02-02T00:56:54.443+0000] {standard_task_runner.py:105} INFO - Job 2: Subtask pipeline_start
+[2026-02-02T00:56:54.448+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:56:54.459+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [running]> on host 173c573a0679
+[2026-02-02T00:56:54.459+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:449 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T00:56:54.484+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='pipeline_start' AIRFLOW_CTX_EXECUTION_DATE='2026-02-01T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-01T00:00:00+00:00'
+[2026-02-02T00:56:54.485+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T00:56:54.495+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-02-02T00:56:54.495+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', 'echo "Starting BEES Brewery Pipeline at $(date)"']
+[2026-02-02T00:56:54.498+0000] {subprocess.py:86} INFO - Output:
+[2026-02-02T00:56:54.500+0000] {subprocess.py:93} INFO - Starting BEES Brewery Pipeline at Mon Feb  2 00:56:54 UTC 2026
+[2026-02-02T00:56:54.500+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2026-02-02T00:56:54.509+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T00:56:54.509+0000] {taskinstance.py:352} INFO - Marking task as SUCCESS. dag_id=bees_brewery_medallion, task_id=pipeline_start, run_id=scheduled__2026-02-01T00:00:00+00:00, execution_date=20260201T000000, start_date=20260202T005654, end_date=20260202T005654
+[2026-02-02T00:56:54.539+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 0
+[2026-02-02T00:56:54.548+0000] {taskinstance.py:3891} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T00:56:54.548+0000] {local_task_job_runner.py:240} INFO - ::endgroup::
+[2026-02-02T01:16:01.467+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2026-02-02T01:16:01.475+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T01:16:01.477+0000] {taskinstance.py:2603} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [queued]>
+[2026-02-02T01:16:01.478+0000] {taskinstance.py:2856} INFO - Starting attempt 1 of 3
+[2026-02-02T01:16:01.482+0000] {taskinstance.py:2879} INFO - Executing <Task(BashOperator): pipeline_start> on 2026-02-01 00:00:00+00:00
+[2026-02-02T01:16:01.485+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70 DeprecationWarning: This process (pid=181) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2026-02-02T01:16:01.485+0000] {standard_task_runner.py:72} INFO - Started process 182 to run task
+[2026-02-02T01:16:01.485+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'bees_brewery_medallion', 'pipeline_start', 'scheduled__2026-02-01T00:00:00+00:00', '--job-id', '2', '--raw', '--subdir', 'DAGS_FOLDER/bees_brewery_dag.py', '--cfg-path', '/tmp/tmp11zmft1h']
+[2026-02-02T01:16:01.486+0000] {standard_task_runner.py:105} INFO - Job 2: Subtask pipeline_start
+[2026-02-02T01:16:01.491+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:209 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T01:16:01.503+0000] {task_command.py:467} INFO - Running <TaskInstance: bees_brewery_medallion.pipeline_start scheduled__2026-02-01T00:00:00+00:00 [running]> on host 7d430775332e
+[2026-02-02T01:16:01.503+0000] {logging_mixin.py:190} WARNING - /home/***/.local/lib/python3.12/site-packages/***/settings.py:449 DeprecationWarning: The sql_alchemy_conn option in [core] has been moved to the sql_alchemy_conn option in [database] - the old setting has been used, but please update your config.
+[2026-02-02T01:16:01.530+0000] {taskinstance.py:3122} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='bees-data-engineering' AIRFLOW_CTX_DAG_ID='bees_brewery_medallion' AIRFLOW_CTX_TASK_ID='pipeline_start' AIRFLOW_CTX_EXECUTION_DATE='2026-02-01T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2026-02-01T00:00:00+00:00'
+[2026-02-02T01:16:01.531+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2026-02-02T01:16:01.542+0000] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2026-02-02T01:16:01.542+0000] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', 'echo "Starting BEES Brewery Pipeline at $(date)"']
+[2026-02-02T01:16:01.545+0000] {subprocess.py:86} INFO - Output:
+[2026-02-02T01:16:01.547+0000] {subprocess.py:93} INFO - Starting BEES Brewery Pipeline at Mon Feb  2 01:16:01 UTC 2026
+[2026-02-02T01:16:01.547+0000] {subprocess.py:97} INFO - Command exited with return code 0
+[2026-02-02T01:16:01.554+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2026-02-02T01:16:01.555+0000] {taskinstance.py:352} INFO - Marking task as SUCCESS. dag_id=bees_brewery_medallion, task_id=pipeline_start, run_id=scheduled__2026-02-01T00:00:00+00:00, execution_date=20260201T000000, start_date=20260202T011601, end_date=20260202T011601
+[2026-02-02T01:16:01.588+0000] {local_task_job_runner.py:261} INFO - Task exited with return code 0
+[2026-02-02T01:16:01.602+0000] {taskinstance.py:3891} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2026-02-02T01:16:01.603+0000] {local_task_job_runner.py:240} INFO - ::endgroup::

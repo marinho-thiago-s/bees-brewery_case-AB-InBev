@@ -1,0 +1,115 @@
+.PHONY: help install test run-dev run-prod clean docker-build docker-up docker-down
+
+help:
+	@echo "🐝 Bees Brewery - Modular Architecture Commands"
+	@echo ""
+	@echo "Development:"
+	@echo "  make install        - Install dependencies"
+	@echo "  make test           - Run all tests"
+	@echo "  make test-verbose   - Run tests with verbose output"
+	@echo "  make test-coverage  - Run tests with coverage report"
+	@echo "  make run-ingestion  - Run ingestion job (dev)"
+	@echo "  make run-transform  - Run transformation job (dev)"
+	@echo "  make run-aggregate  - Run aggregation job (dev)"
+	@echo ""
+	@echo "Docker:"
+	@echo "  make docker-build   - Build Docker images"
+	@echo "  make docker-up      - Start Docker containers"
+	@echo "  make docker-down    - Stop Docker containers"
+	@echo "  make docker-logs    - View Docker logs"
+	@echo ""
+	@echo "Configuration:"
+	@echo "  make config-dev     - Use development config"
+	@echo "  make config-prod    - Use production config"
+	@echo ""
+	@echo "Documentation:"
+	@echo "  make docs           - View architecture documentation"
+	@echo "  make adr            - View ADRs"
+
+install:
+	pip install -r requirements.txt
+	pip install pytest pytest-cov
+
+test:
+	export AIRFLOW_ENV=dev && pytest tests/ -v
+
+test-verbose:
+	export AIRFLOW_ENV=dev && pytest tests/ -vv -s
+
+test-coverage:
+	export AIRFLOW_ENV=dev && pytest tests/ --cov=spark_jobs --cov=core --cov=config --cov-report=html
+
+run-ingestion:
+	export AIRFLOW_ENV=dev && python -c "\
+		from config.config import Config;\
+		from core.storage import get_storage;\
+		from spark_jobs.ingestion import IngestionJob;\
+		config = Config.from_env('dev');\
+		storage = get_storage(config.to_dict()['storage']);\
+		job = IngestionJob(config.to_dict(), storage);\
+		job.execute()"
+
+run-transform:
+	export AIRFLOW_ENV=dev && python -c "\
+		from config.config import Config;\
+		from core.storage import get_storage;\
+		from spark_jobs.transformation_silver import TransformationJob;\
+		config = Config.from_env('dev');\
+		storage = get_storage(config.to_dict()['storage']);\
+		job = TransformationJob(config.to_dict(), storage);\
+		job.execute()"
+
+run-aggregate:
+	export AIRFLOW_ENV=dev && python -c "\
+		from config.config import Config;\
+		from core.storage import get_storage;\
+		from spark_jobs.aggregation_gold import AggregationJob;\
+		config = Config.from_env('dev');\
+		storage = get_storage(config.to_dict()['storage']);\
+		job = AggregationJob(config.to_dict(), storage);\
+		job.execute()"
+
+docker-build:
+	docker-compose build --no-cache
+
+docker-up:
+	docker-compose up -d
+
+docker-down:
+	docker-compose down
+
+docker-logs:
+	docker-compose logs -f
+
+docker-ps:
+	docker-compose ps
+
+config-dev:
+	export AIRFLOW_ENV=dev
+	@echo "✅ Configuration set to: dev"
+
+config-prod:
+	export AIRFLOW_ENV=prod
+	@echo "✅ Configuration set to: prod"
+
+docs:
+	@echo "Opening documentation..."
+	@echo ""
+	@echo "📄 Main Documents:"
+	@echo "  - docs/adr/ADR-001-modular-architecture.md"
+	@echo "  - docs/ARCHITECTURE_IMPLEMENTATION.md"
+	@echo "  - docs/IMPLEMENTATION_SUMMARY.md"
+	@echo ""
+	@ls -la docs/adr/
+
+adr:
+	@echo "📋 Architecture Decision Records:"
+	@ls -la docs/adr/
+
+clean:
+	find . -type d -name __pycache__ -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name ".pytest_cache" -exec rm -rf {} +
+	find . -type d -name ".coverage" -exec rm -rf {} +
+	find . -type d -name "htmlcov" -exec rm -rf {} +
+	@echo "✅ Cleaned up cache files"

@@ -1,0 +1,14 @@
+# Main orchestration (updated to support Python 3.12)
+apache-airflow>=2.10.0
+apache-airflow-providers-apache-spark>=4.11.0
+
+# Data processing
+pyspark>=3.4.0
+requests
+
+# Testing
+pytest
+pytest-cov
+
+# Utilities
+python-dotenv
