@@ -1,10 +1,10 @@
 # ADR-001: Modular and Scalable Data Pipeline Architecture
 
-**Date:** 2026-02-01  
-**Status:** Accepted  
-**Authors:** Data Engineering Team  
-**Stakeholders:** Architecture Team, DevOps, Data Science Team  
-**Case Requirements Alignment:** ✅ Scalability, ✅ Testing, ✅ Error Handling, ✅ Documentation
+Date: 2026-02-01  
+Status: Accepted  
+Authors: Data Engineering Team  
+Stakeholders: Architecture Team, DevOps, Data Science Team  
+Case Requirements Alignment: Scalability, Testing, Error Handling, Documentation
 
 ---
 
@@ -12,106 +12,103 @@
 
 ### Case Requirements (Bees Brewery)
 
-O caso técnico da Bees solicita uma solução de **Data Engineering com foco em**:
+The technical case from Bees requests a **Data Engineering solution focused on**:
 
-1. **Pagination em APIs e Data Partitioning** → Performance e Scalability
-2. **Automated Tests e Data Integrity Validation** → Robustez
-3. **Scalable Architecture com Error Handling Robusto** → Resiliência
-4. **Git Best Practices e Clear Documentation** → Manutenibilidade
+1. **API Pagination and Data Partitioning** - Performance and Scalability
+2. **Automated Tests and Data Integrity Validation** - Robustness
+3. **Scalable Architecture with Robust Error Handling** - Resilience
+4. **Git Best Practices and Clear Documentation** - Maintainability
 
-### Por Que Uma Arquitetura Modular?
+### Why a Modular Architecture?
 
-Para atender esses requirements, identificamos a necessidade de uma arquitetura que:
+To meet these requirements, we identified the need for an architecture that:
 
-- 🏗️ **Seja modular e escalável**: Permitir adicionar novos data sources, transformações e storage backends sem refatorar código existente
-- 🧪 **Seja testável**: Abstrair dependências (storage, spark sessions) para permitir testes unitários robustos
-- 🛡️ **Tenha error handling estruturado**: Exceções customizadas, logging centralizado, retry policies
-- 📚 **Seja auto-documentada**: Padrões claros, naming conventions, type hints
-- ☁️ **Seja cloud-ready**: Suportar múltiplos storage backends (local, S3, GCS)
-- 🔧 **Seja configurável**: Diferentes configs para dev/staging/prod sem mudanças de código
+- **Is modular and scalable**: Allow adding new data sources, transformations and storage backends without refactoring existing code
+- **Is testable**: Abstract dependencies (storage, spark sessions) to enable robust unit tests
+- **Has structured error handling**: Custom exceptions, centralized logging, retry policies
+- **Is self-documenting**: Clear patterns, naming conventions, type hints
+- **Is cloud-ready**: Support multiple storage backends (local, S3, GCS)
+- **Is configurable**: Different configs for dev/staging/prod without code changes
 
 ---
 
 ## Decision
 
-### Arquitetura em Camadas (Medallion + Layered Architecture)
+### Layered Architecture (Medallion + Layered Architecture)
 
-Implementar uma arquitetura **modular baseada em camadas de abstração** seguindo o padrão **Medallion** (Bronze → Silver → Gold) com **separação clara de responsabilidades**:
+Implement a **modular architecture based on abstraction layers** following the **Medallion pattern** (Bronze -> Silver -> Gold) with **clear separation of responsibilities**:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ ORCHESTRATION LAYER                                         │
-│ Apache Airflow + DAG Framework                              │
-│ ✅ Scheduler, monitoring, dependency management             │
-│ ✅ Pagination/partitioning control via job scheduling       │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────────┐
-│ JOB ABSTRACTION LAYER                                       │
-│ BaseJob (ABC) - Padrão único para todos os jobs             │
-│ ✅ Extract, Transform, Load (ETL pattern)                   │
-│ ✅ Error handling, logging, validation centralizado         │
-│ ✅ Fácil de testar via mocks                                │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────────┐
-│ CORE SERVICES LAYER                                         │
-│ Storage (abstração), Spark (factory), Logger, Exceptions    │
-│ ✅ Desacoplamento de dependências                           │
-│ ✅ Suporte a múltiplos storage backends                     │
-│ ✅ Logging estruturado para troubleshooting                 │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────────┐
-│ CONFIGURATION LAYER                                         │
-│ YAML-based config + Environment-specific profiles           │
-│ ✅ Sem hardcoding de paths/credentials                      │
-│ ✅ Fácil switching entre ambientes                          │
-└─────────────────────────────────────────────────────────────┘
+ORCHESTRATION LAYER
+Apache Airflow + DAG Framework
+- Scheduler, monitoring, dependency management
+- Pagination/partitioning control via job scheduling
+        |
+        v
+JOB ABSTRACTION LAYER
+BaseJob (ABC) - Single pattern for all jobs
+- Extract, Transform, Load (ETL pattern)
+- Centralized error handling, logging, validation
+- Easy to test via mocks
+        |
+        v
+CORE SERVICES LAYER
+Storage (abstraction), Spark (factory), Logger, Exceptions
+- Decoupling of dependencies
+- Support for multiple storage backends
+- Structured logging for troubleshooting
+        |
+        v
+CONFIGURATION LAYER
+YAML-based config + Environment-specific profiles
+- No hardcoding of paths/credentials
+- Easy switching between environments
+        |
+        v
+DATA LAYER (Medallion)
+Bronze -> Silver -> Gold
 ```
 
-### Estrutura de Diretórios
+### Directory Structure
 
 ```
 bees-brewery-case/
 ├── config/                    # Configuration Layer
-│   ├── config.py              # Dataclasses para config
+│   ├── config.py
 │   └── environments/
-│       ├── dev.yaml           # Development config
-│       ├── staging.yaml       # Staging config
-│       └── prod.yaml          # Production config
+│       ├── dev.yaml
+│       ├── staging.yaml
+│       └── prod.yaml
 │
 ├── core/                      # Core Services Layer
-│   ├── storage.py             # Storage backend abstraction (Local, S3, GCS)
-│   ├── spark_session.py       # SparkSession factory + configuration
+│   ├── storage.py             # Storage abstraction
+│   ├── spark_session.py       # SparkSession factory
 │   ├── logger.py              # Structured logging
-│   └── exceptions.py          # Custom exceptions para error handling
+│   └── exceptions.py          # Custom exceptions
 │
-├── spark_jobs/               # Job Abstraction Layer
-│   ├── base_job.py            # BaseJob ABC - padrão único
-│   ├── ingestion.py           # Bronze layer jobs
-│   ├── transformation.py      # Silver layer jobs
-│   ├── aggregation.py         # Gold layer jobs
-│   └── data_quality.py        # Data validation e integrity checks
+├── spark_jobs/                # Job Abstraction Layer
+│   ├── base_job.py            # BaseJob ABC
+│   ├── ingestion.py           # Bronze layer
+│   ├── transformation_silver.py # Silver layer
+│   ├── aggregation_gold.py     # Gold layer
+│   └── data_quality.py        # Data validation
 │
 ├── schemas/                   # Data Contracts
-│   ├── bronze.py              # Bronze layer schemas
-│   ├── silver.py              # Silver layer schemas
-│   └── gold.py                # Gold layer schemas
+│   └── bronze.py
 │
 ├── dags/                      # Orchestration Layer
-│   └── bees_brewery_dag.py    # Clean DAG - simples e legível
+│   └── bees_brewery_dag.py    # Clean DAG
 │
 └── tests/                     # Automated Tests
-    ├── test_ingestion.py      # Unit tests com mocks
+    ├── test_ingestion.py
     ├── test_transformation.py
     ├── test_aggregation.py
-    └── test_architecture.py   # Integration tests
+    └── test_architecture.py
 ```
 
-### Componentes-Chave
+### Key Components
 
-#### 1️⃣ Configuration Layer - Multi-Environment Support
+#### 1. Configuration Layer - Multi-Environment Support
 
 ```python
 from dataclasses import dataclass
@@ -137,9 +134,9 @@ class AppConfig:
             return cls(**yaml.safe_load(f))
 ```
 
-**Benefício para caso Bees:** ✅ Suporta dev/staging/prod sem código changes
+**Case requirement met**: Supports dev/staging/prod without code changes
 
-#### 2️⃣ Storage Abstraction - Multi-Backend Support
+#### 2. Storage Abstraction - Multi-Backend Support
 
 ```python
 class StorageBackend(ABC):
@@ -152,20 +149,17 @@ class StorageBackend(ABC):
         pass
 
 class LocalStorage(StorageBackend):
-    # Para desenvolvimento local
+    # For development
     pass
 
 class S3Storage(StorageBackend):
-    # Para produção em cloud
+    # For production in cloud
     pass
-
-# Factory pattern
-storage = storage_factory(config.storage.backend, config.storage.path)
 ```
 
-**Benefício para caso Bees:** ✅ Implementação escalável, suporta crescimento (local → cloud)
+**Case requirement met**: Scalable implementation, supports growth (local -> cloud)
 
-#### 3️⃣ Job Abstraction - Padrão Único com Error Handling
+#### 3. Job Abstraction - Single Pattern with Error Handling
 
 ```python
 class BaseJob(ABC):
@@ -183,12 +177,12 @@ class BaseJob(ABC):
         pass
     
     def run(self, input_path: str, output_path: str) -> None:
-        """ETL pipeline com error handling"""
+        """ETL pipeline with error handling"""
         try:
             df = self.extract()
             self._validate_data_quality(df)  # Data integrity check
             df = self.transform(df)
-            self._validate_data_quality(df)  # Validate antes de salvar
+            self._validate_data_quality(df)  # Validate before saving
             self.load(df, output_path)
         except DataQualityException as e:
             self.logger.error(f"Data integrity failed: {e}")
@@ -198,14 +192,14 @@ class BaseJob(ABC):
             raise SparkJobException(e)
 ```
 
-**Benefício para caso Bees:** ✅ Error handling robusto, data validation, testable
+**Case requirement met**: Robust error handling, data validation, testable
 
-#### 4️⃣ Data Quality Validation - Integrity Before Storage
+#### 4. Data Quality Validation - Integrity Before Storage
 
 ```python
 class BaseJob(ABC):
     def _validate_data_quality(self, df: DataFrame) -> None:
-        """Valida integridade antes de armazenar"""
+        """Validates integrity before storage"""
         if df.count() == 0:
             raise DataQualityException("Empty dataframe")
         
@@ -213,51 +207,51 @@ class BaseJob(ABC):
             raise DataQualityException("Null values in required fields")
 ```
 
-**Benefício para caso Bees:** ✅ "Automated tests e validate data integrity before storage"
+**Case requirement met**: "Automated tests and validate data integrity before storage"
 
 ---
 
-## Alinhamento com Case Requirements
+## Alignment with Case Requirements
 
-| Requirement | Como Atendemos |
+| Requirement | How We Meet It |
 |---|---|
-| **Pagination em APIs + Data Partitioning** | Spark partitions via config; Airflow scheduler para processamento em chunks |
-| **Automated Tests** | BaseJob testável com mocks; fixtures em conftest.py; ~80% coverage |
-| **Data Integrity Validation** | `_validate_data_quality()` em BaseJob; schemas em `schemas/` |
-| **Scalable Architecture** | Modular design; adicionar novos jobs sem refatorar; support local→S3→GCS |
-| **Robust Error Handling** | Custom exceptions; try-catch com logging; retry policies em Airflow |
-| **Clear Documentation** | ADRs; type hints; docstrings; este documento |
-| **Git Best Practices** | Estrutura clara; separation of concerns; easy to review/merge |
+| **API Pagination + Data Partitioning** | Spark partitions via config; Airflow scheduler for chunk processing |
+| **Automated Tests** | Testable BaseJob with mocks; fixtures in conftest.py; ~80% coverage |
+| **Data Integrity Validation** | `_validate_data_quality()` in BaseJob; schemas in `schemas/` |
+| **Scalable Architecture** | Modular design; add new jobs without refactoring; support local->S3->GCS |
+| **Robust Error Handling** | Custom exceptions; try-catch with logging; retry policies in Airflow |
+| **Clear Documentation** | ADRs; type hints; docstrings; this document |
+| **Git Best Practices** | Clear structure; separation of concerns; easy to review/merge |
 
 ---
 
 ## Consequences
 
-### Positive ✅
+### Positive
 
-1. **Escalabilidade Horizontal** - Adicionar novos data sources/transformações sem quebrar código existente
-2. **Testabilidade Completa** - Abstrair storage/spark permite testes unitários com 100% coverage potencial
-3. **Data Quality Assurance** - Validação de integridade antes de cada armazenamento
-4. **Error Handling Robusto** - Exceções customizadas, logging estruturado, retry policies
-5. **Multi-Environment Support** - dev/staging/prod com configuração YAML, sem code changes
-6. **Cloud-Ready** - Suportar S3, GCS, Delta Lake apenas mudando config
-7. **Self-Documenting Code** - Type hints, padrão único (BaseJob), docstrings claras
-8. **Easy Onboarding** - Novo dev vê o padrão em 1 job e consegue criar 10 novos
+1. **Horizontal Scalability** - Add new data sources/transformations without breaking code
+2. **Complete Testability** - Abstract storage/spark enables unit tests with 100% potential coverage
+3. **Data Quality Assurance** - Integrity validation before each storage
+4. **Robust Error Handling** - Custom exceptions, structured logging, retry policies
+5. **Multi-Environment Support** - dev/staging/prod with YAML config, no code changes
+6. **Cloud-Ready** - Support S3, GCS, Delta Lake by changing config only
+7. **Self-Documenting Code** - Type hints, single pattern (BaseJob), clear docstrings
+8. **Easy Onboarding** - New dev understands pattern from 1 job, can create 10 new ones
 
-### Trade-offs ⚠️
+### Trade-offs
 
-1. **Boilerplate Inicial** - Mais código estrutural nos primeiros jobs (~30% overhead inicial)
-2. **Curva de Aprendizado** - Time precisa entender abstração, Factory pattern, ABC
-3. **Overhead de Config** - Precisa manter YAML para cada ambiente (mitigado por template reutilizável)
+1. **Initial Boilerplate** - More structural code in first jobs (~30% initial overhead)
+2. **Learning Curve** - Team needs to understand abstraction, Factory pattern, ABC
+3. **Config Maintenance** - Must maintain YAML for each environment (mitigated by reusable template)
 
 ---
 
-## Alternativas Consideradas (e Por Que Rejeitadas)
+## Alternatives Considered (and Why Rejected)
 
-### ❌ Alternativa 1: Monolithic Script Approach
+### Alternative 1: Monolithic Script Approach
 
 ```python
-# Tudo em um arquivo Python gigante
+# Everything in one giant Python file
 def run_everything():
     spark = SparkSession.builder.appName("everything").master("local[*]").getOrCreate()
     
@@ -274,84 +268,67 @@ def run_everything():
     result.write.parquet("/tmp/gold")
 ```
 
-**Por que rejeitado:**
-- ❌ Impossível testar (hardcoded paths, no mocks)
-- ❌ Não escalável (novo data source = copiar/colar código)
-- ❌ Difícil error handling (tudo no mesmo try-catch)
-- ❌ Não suporta múltiplos ambientes (hardcoded `/tmp/`)
-- ❌ Data validation não existe
-- ❌ **Falha em 4 dos 6 requirements do caso**
+**Why rejected**:
+- Impossible to test (hardcoded paths, no mocks)
+- Not scalable (new data source = copy/paste code)
+- Difficult error handling (everything in same try-catch)
+- Doesn't support multiple environments (hardcoded `/tmp/`)
+- No data validation
+- Fails 4 of 6 case requirements
 
-### ❌ Alternativa 2: Usando Apache Beam/Google Cloud Dataflow
+### Alternative 2: Using Apache Beam/Google Cloud Dataflow
 
-```python
-# Beam approach
-pipeline = beam.Pipeline(options=options)
-(pipeline
-    | 'Read' >> beam.io.ReadFromText(...)
-    | 'Transform' >> beam.Map(transform_fn)
-    | 'Write' >> beam.io.WriteToText(...))
-pipeline.run()
-```
+**Why rejected**:
+- Overkill for batch processing (Beam is for streaming)
+- Higher learning curve
+- Vendor lock-in with Google Cloud
+- Spark already meets all requirements
+- Airflow + Spark is more common in industry
 
-**Por que rejeitado:**
-- ⚠️ Overkill para batch processing (Beam é para streaming)
-- ⚠️ Curva de aprendizado maior
-- ⚠️ Vendor lock-in com Google Cloud
-- ⚠️ Spark já atende todos os requirements
-- ⚠️ Airflow + Spark é mais comum no mercado
+### Alternative 3: Serverless Functions (AWS Lambda)
 
-### ❌ Alternativa 3: Serverless Functions (AWS Lambda)
+**Why rejected**:
+- 15-minute timeout (inadequate for large jobs)
+- Memory/compute limits
+- Difficult to coordinate pipeline (ingestion -> transformation -> aggregation)
+- Spark is better for data at scale
 
-```python
-# Lambda + S3 triggers
-def lambda_handler(event, context):
-    # Process S3 files
-    # Problemas: 15min timeout, memory limits, não ideal para ETL
-```
+### Alternative 4: Containers + Kubernetes (Future)
 
-**Por que rejeitado:**
-- ⚠️ Timeout de 15 minutos (inadequado para jobs grandes)
-- ⚠️ Memory/compute limits
-- ⚠️ Difícil coordenar pipeline (ingestion → transformation → aggregation)
-- ⚠️ Spark é melhor para dados em escala
+**Status**: Post-implementation (Phase 2)
 
-### ✅ Alternativa 4: Containers + Kubernetes (Futuro)
-
-**Status:** Post-implementation (Phase 2)
-
-Quando migrar para K8s:
-- Containerizar com Docker ✅ (já implementado)
-- Usar Spark on Kubernetes operator
-- Usar Airflow no K8s
+When migrating to K8s:
+- Containerize with Docker (already implemented)
+- Use Spark on Kubernetes operator
+- Use Airflow on K8s
 
 ---
 
 ## Implementation Roadmap
 
-### Phase 1: Core (Week 1-2) - **CURRENT**
+### Phase 1: Core (Week 1-2) - CURRENT
 
-- [x] Configuration Layer (YAML-based)
-- [x] Core Services (Storage, Logger, Exceptions)
-- [x] Job Abstraction (BaseJob pattern)
-- [x] Schema Layer (Data contracts)
-- [x] Clean DAG (Airflow orchestration)
-- [x] Automated Tests (Unit + Integration)
-- [x] Documentation (ADRs + this)
+- Configuration Layer (YAML-based)
+- Core Services (Storage, Logger, Exceptions)
+- Job Abstraction (BaseJob pattern)
+- Schema Layer (Data contracts)
+- Clean DAG (Airflow orchestration)
+- Automated Tests (Unit + Integration)
+- Documentation (ADRs)
 
-### Phase 2: Cloud (Q2 2026) 🎯
+### Phase 2: Cloud (Q2 2026)
 
-- [ ] Add S3Storage backend (production use)
-- [ ] Add GCS storage backend (multi-cloud)
-- [ ] Setup CI/CD pipeline
-- [ ] Add monitoring + alerting
+- Add S3Storage backend
+- Add GCS storage backend
+- Setup CI/CD pipeline
+- Add monitoring + alerting
 
-### Phase 3: Advanced (Q3 2026) 📊
+### Phase 3: Advanced (Q3 2026)
 
-- [ ] Delta Lake integration (ACID transactions)
-- [ ] Data cataloging (Hive Metastore)
-- [ ] Kubernetes deployment
-- [ ] ML pipeline integration
+- Delta Lake integration
+- Data cataloging
+- Kubernetes deployment
+- ML pipeline integration
 
 ---
 
@@ -361,11 +338,11 @@ Quando migrar para K8s:
 
 ```python
 def test_ingestion_job_validates_data_quality():
-    """Testa que job valida integridade antes de salvar"""
+    """Test that job validates integrity before saving"""
     mock_storage = Mock()
     job = IngestionJob(mock_config, mock_storage)
     
-    # Simular dataframe com dados ruins
+    # Simulate dataframe with bad data
     job.extract = Mock(return_value=df_with_nulls)
     
     with pytest.raises(DataQualityException):
@@ -376,18 +353,18 @@ def test_ingestion_job_validates_data_quality():
 
 ```python
 def test_full_pipeline():
-    """Testa pipeline completo com dados reais"""
+    """Test complete pipeline with real data"""
     config = AppConfig.from_yaml('dev')
     storage = storage_factory('local', '/tmp/test')
     
-    # Ingestion → Transformation → Aggregation
+    # Ingestion -> Transformation -> Aggregation
     job1 = IngestionJob(config, storage)
     job1.run('raw', 'bronze')
     
     assert storage.exists('bronze')
 ```
 
-**Coverage Goal:** > 80% com foco em error paths
+**Coverage Goal**: > 80% with focus on error paths
 
 ---
 
@@ -405,22 +382,21 @@ pytest tests/ -v --cov
 
 ```bash
 docker-compose -f docker-compose.yaml up -d
-# Acessa Airflow em http://localhost:8080
-# DAG roda diariamente com schedule_interval='0 0 * * *'
+# Access Airflow at http://localhost:8080
+# DAG runs daily with schedule_interval='0 0 * * *'
 ```
 
 ---
 
 ## References
 
-- [Medallion Architecture - Databricks](https://www.databricks.com/blog/2022/06/24/use-the-medallion-lakehouse-architecture-to-build-data-platforms-on-databricks.html)
-- [Factory Pattern in Python](https://refactoring.guru/design-patterns/factory-method/python)
-- [Clean Code - Uncle Bob](https://www.oreilly.com/library/view/clean-code-a/9780136083238/)
-- [Apache Spark Best Practices](https://spark.apache.org/docs/latest/api/python/)
-- [Airflow Best Practices](https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html)
+- Medallion Architecture - Databricks
+- Factory Pattern in Python
+- Apache Spark Best Practices
+- Airflow Best Practices
 
 ---
 
-**Last Updated:** 2026-02-01  
-**Next Review:** 2026-03-01  
-**Status:** ✅ Implements all Bees case requirements
+Last Updated: 2026-02-01  
+Next Review: 2026-03-01  
+Status: Implements all Bees case requirements

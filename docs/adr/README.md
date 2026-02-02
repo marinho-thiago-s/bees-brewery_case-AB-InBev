@@ -1,158 +1,155 @@
-# 📋 Architecture Decision Records (ADRs)
+# Architecture Decision Records (ADRs)
 
-**Status:** ✅ Complete  
-**Last Updated:** 2026-02-02
-
----
-
-## O que são ADRs?
-
-ADRs (Architecture Decision Records) documentam decisões arquiteturais importantes, seu contexto, alternativas consideradas e consequências. Isto facilita:
-
-- ✅ Entender POR QUE cada decisão foi tomada
-- ✅ Evitar re-decidir a mesma coisa no futuro
-- ✅ Onboard novos desenvolvedores rapidamente
-- ✅ Rastrear evolução arquitetural
+Status: Complete
+Last Updated: 2026-02-02
 
 ---
 
-## ADRs do Projeto
+## What are ADRs?
 
-### ✅ [ADR-001: Modular and Scalable Data Pipeline Architecture](ADR-001-modular-architecture.md)
+ADRs (Architecture Decision Records) document important architectural decisions, their context, considered alternatives and consequences. This helps:
 
-**Status:** Accepted  
-**Date:** 2026-02-01  
+- Understand WHY each decision was made
+- Avoid re-deciding the same thing in the future
+- Onboard new developers quickly
+- Track architectural evolution
+
+---
+
+## Project ADRs
+
+### ADR-001: Modular and Scalable Data Pipeline Architecture
+
+**Status:** Accepted
+**Date:** 2026-02-01
 **Covers:** Architectural layers, separation of concerns, design patterns
 
-**Decisão:** Implementar arquitetura em camadas (Orchestration → Jobs → Services → Config → Data)
+**Decision:** Implement layered architecture (Orchestration -> Jobs -> Services -> Config -> Data)
 
-**Por quê:**
-- Escalabilidade: Adicionar novos jobs sem quebrar código existente
-- Testabilidade: Abstrair dependências (storage, spark) para mocks
-- Manutenibilidade: Cada layer tem responsabilidade clara
+**Why:**
+- Scalability: Add new jobs without breaking existing code
+- Testability: Abstract dependencies (storage, spark) for mocks
+- Maintainability: Each layer has clear responsibility
 
-**Alternativas rejeitadas:**
-- ❌ Monolithic script (não escalável, difícil testar)
-- ❌ Serverless/Lambda (15min timeout inadequado)
-- ❌ Beam/Dataflow (overkill para batch, vendor lock-in)
+**Alternatives rejected:**
+- Monolithic script (not scalable, difficult to test)
+- Serverless/Lambda (15min timeout inadequate)
+- Beam/Dataflow (overkill for batch, vendor lock-in)
 
-**Impacto:** Fundamental à arquitetura, permite crescimento
+**Impact:** Fundamental to architecture, enables growth
 
 ---
 
-### ✅ [ADR-002: Technology Stack & Implementation Details](ADR-002-TECH-STACK.md)
+### ADR-002: Technology Stack and Implementation Details
 
-**Status:** Accepted  
-**Date:** 2026-02-01  
+**Status:** Accepted
+**Date:** 2026-02-01
 **Covers:** PySpark, Airflow, Parquet, Docker, Exception handling
 
-**Decisões Principais:**
+**Key Decisions:**
 
-| Componente | Tecnologia | Alternativa Rejeitada | Motivo |
-|-----------|-----------|----------------------|--------|
-| Data Layer | Medallion (3 layers) | Single layer | Auditabilidade + separação |
-| Processing | Apache Spark | Pandas/Dask/Polars | Partitioning nativo + maturity |
-| Orchestration | Apache Airflow | Prefect/Dagster/Cron | Superior UI + comunidade |
+| Component | Technology | Alternative | Reason |
+|-----------|-----------|------------|--------|
+| Data Layer | Medallion (3 layers) | Single layer | Auditability + separation |
+| Processing | Apache Spark | Pandas/Dask/Polars | Native partitioning + maturity |
+| Orchestration | Apache Airflow | Prefect/Dagster/Cron | Superior UI + community |
 | Storage Format | Parquet | CSV/JSON/ORC | Columnar + compression + partitioning |
 | Error Handling | Exception hierarchy | Flat exceptions | Type-specific handling |
 | Deployment | Docker | Virtual envs | Reproducible + cloud-native |
 
-**Impacto:** Define todas as ferramentas do projeto
+**Impact:** Defines all project tools
 
 ---
 
-### 📌 ADR-003: Medallion Pattern Implementation
+### ADR-003: Medallion Pattern Implementation
 
-**Status:** Post-implementation documentation  
+**Status:** Implemented
 **Date:** 2026-02-02
 
-**Decisão:** Implementar Medallion com 3 camadas explícitas (Bronze → Silver → Gold)
+**Decision:** Implement Medallion with 3 explicit layers (Bronze -> Silver -> Gold)
 
-**Camadas:**
-- **Bronze:** Raw data (9.083 registros brutos)
-- **Silver:** Cleaned (5.451 registros, 60% retenção)
-- **Gold:** Analytics-ready (389 agregações)
+**Layers:**
+- Bronze: Raw data (9.083 raw records)
+- Silver: Cleaned (5.451 records, 60% retention)
+- Gold: Analytics-ready (389 aggregations)
 
-**Benefícios:**
-- ✅ Auditabilidade completa (Bronze = cópia exata da fonte)
-- ✅ Escalabilidade (cada camada independente)
-- ✅ Data quality (validações aplicadas em cada camada)
+**Benefits:**
+- Complete auditability (Bronze = exact source copy)
+- Scalability (each layer independent)
+- Data quality (validations applied at each layer)
 
 ---
 
-## Estrutura de um ADR
+## Using ADRs
 
-Cada ADR segue este template:
+### For Developers
+
+1. Read ADR-001 to understand general architecture
+2. Read ADR-002 to understand technologies
+3. Read ADR-003 to understand data flow
+4. When implementing something new, check for relevant ADR
+
+### For Architects
+
+1. When making important decision, create new ADR
+2. Reference related existing ADRs
+3. Document considered alternatives
+4. Keep status and date clear
+
+### For New Team Members
+
+1. Start with this README
+2. Read ADR-001 (how everything is organized)
+3. Read ADR-002 (why we use these technologies)
+4. Explore code with architecture context
+
+---
+
+## ADR Template
+
+Each ADR follows this structure:
 
 ```markdown
-# ADR-XXX: Título da Decisão
+# ADR-XXX: Decision Title
 
 ## Context
-O que nos levou a esta decisão?
+What led us to this decision?
 (business requirements, technical constraints, etc)
 
 ## Decision
-O que decidimos?
+What did we decide?
 
 ## Rationale
-Por quê? (com comparação de alternativas)
+Why? (with comparison of alternatives)
 
 ## Consequences
-Impactos positivos e trade-offs
+Positive impacts and trade-offs
 
 ## Alternatives Considered
-Opções rejeitadas e motivos
+Rejected options and reasons
 ```
 
 ---
 
-## Como Usar ADRs
+## Future ADRs (Planned)
 
-### Para Developers
-```
-1. Leia ADR-001 para entender a arquitetura geral
-2. Leia ADR-002 para entender as tecnologias
-3. Leia ADR-003 para entender o fluxo de dados
-4. Ao implementar algo novo, veja se existe ADR relevante
-```
+When we implement these topics:
 
-### Para Arquitetos
-```
-1. Quando tomar decisão importante, crie novo ADR
-2. Referencie ADRs existentes relacionados
-3. Documente alternativas consideradas
-4. Deixe o status e data clara
-```
-
-### Para Novos Membros do Time
-```
-1. Comece com este README
-2. Leia ADR-001 (como tudo é organizado)
-3. Leia ADR-002 (por que usamos essas tecnologias)
-4. Explore o código com contexto da arquitetura
-```
+- ADR-004: S3 Storage Backend Integration
+- ADR-005: Kubernetes Deployment Strategy
+- ADR-006: Delta Lake for ACID Transactions
+- ADR-007: Data Catalog Implementation
+- ADR-008: ML Pipeline Integration
 
 ---
 
-## Evolução Futura (ADRs Planejados)
+## References
 
-Quando implementarmos estes tópicos:
-
-- [ ] **ADR-004:** S3 Storage Backend Integration
-- [ ] **ADR-005:** Kubernetes Deployment Strategy
-- [ ] **ADR-006:** Delta Lake for ACID Transactions
-- [ ] **ADR-007:** Data Catalog Implementation
-- [ ] **ADR-008:** ML Pipeline Integration
+- Michael Nygard: Architecture Decision Records
+- ADR GitHub
+- ADR Tools
 
 ---
 
-## Referências
-
-- [Michael Nygard: ADRs](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)
-- [ADR GitHub](https://adr.github.io/)
-- [ADR Tools](https://github.com/npryce/adr-tools)
-
----
-
-**Next Review:** 2026-03-01  
-**Maintained by:** Data Engineering Team
+Next Review: 2026-03-01
+Maintained by: Data Engineering Team

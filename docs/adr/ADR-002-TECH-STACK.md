@@ -1,15 +1,15 @@
-# ADR-002: Technology Stack & Implementation Details
+# ADR-002: Technology Stack and Implementation Details
 
-**Date:** 2026-02-01  
-**Status:** Accepted  
-**Authors:** Data Engineering Team  
-**Stakeholders:** DevOps, Data Science, Platform Team  
-**Related to:** ADR-001 (Modular Architecture) - this document provides technical details  
-**Case Requirements Alignment:** ✅ All 6 requirements  
+Date: 2026-02-01  
+Status: Accepted  
+Authors: Data Engineering Team  
+Stakeholders: DevOps, Data Science, Platform Team  
+Related to: ADR-001 (Modular Architecture) - this document provides technical details  
+Case Requirements Alignment: All 6 requirements  
 
 ---
 
-## 📋 Índice de Temas
+## Table of Contents
 
 1. [Overview](#overview)
 2. [Data Layer - Medallion Architecture](#1-data-layer---medallion-architecture)
@@ -24,26 +24,26 @@
 
 ## Overview
 
-Este documento consolida decisões técnicas que suportam a arquitetura modular definida em **ADR-001**. Cada seção responde:
+This document consolidates technical decisions supporting the modular architecture defined in ADR-001. Each section answers:
 
-- **O que escolhemos?** (Tecnologia/padrão)
-- **Por que escolhemos?** (Alinhamento com requirements + alternativas)
-- **Como implementamos?** (Código + exemplos)
-- **Como atende o caso?** (Mapeamento com 6 requirements)
+- What did we choose? (Technology/pattern)
+- Why did we choose it? (Requirements alignment + alternatives)
+- How did we implement it? (Code + examples)
+- How does it meet the case? (Mapping to 6 requirements)
 
 ---
 
 ## 1. Data Layer - Medallion Architecture
 
-### Context (Por que essa estrutura?)
+### Context (Why this structure?)
 
-**Case Requirement:** ✅ Scalability, ✅ Data Integrity
+Case Requirement: Scalability, Data Integrity
 
-O projeto precisa estruturar dados de múltiplas fontes (APIs, databases, files) de forma escalável e auditável.
+The project must structure data from multiple sources (APIs, databases, files) in a scalable and auditable way.
 
 ### Decision: Three-Layer Medallion Architecture
 
-Implementamos estrutura em 3 camadas com responsabilidades claras:
+We implemented a 3-layer structure with clear responsibilities:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -84,7 +84,7 @@ Implementamos estrutura em 3 camadas com responsabilidades claras:
 ### Implementation
 
 ```python
-# spark_jobs/base_job.py - Medallio pattern
+# spark_jobs/base_job.py - Medallion pattern
 class BaseJob(ABC):
     """Implements medallion layer pattern"""
     
@@ -95,97 +95,29 @@ class BaseJob(ABC):
         self.load(df, output_path)    # Write to layer N
 ```
 
-```python
-# spark_jobs/ingestion.py - Bronze Layer
-class IngestionJob(BaseJob):
-    """BRONZE LAYER: Raw data ingestion"""
-    
-    def extract(self) -> DataFrame:
-        # Read from external source (API, file, database)
-        return self.spark.read.csv("s3://data-source/breweries.csv")
-    
-    def transform(self, df: DataFrame) -> DataFrame:
-        # Minimal transformation: only add metadata
-        from pyspark.sql.functions import current_timestamp, input_file_name
-        return df.withColumn("ingestion_timestamp", current_timestamp()) \
-                 .withColumn("source_file", input_file_name())
-
-# spark_jobs/transformation_silver.py - Silver Layer
-class TransformationJob(BaseJob):
-    """SILVER LAYER: Data cleaning & enrichment"""
-    
-    def extract(self) -> DataFrame:
-        return self.spark.read.parquet(f"{self.config.storage.path}/bronze")
-    
-    def transform(self, df: DataFrame) -> DataFrame:
-        # Data quality checks
-        if df.count() == 0:
-            raise DataQualityException("Empty dataset from bronze")
-        
-        # Cleaning
-        df = df.dropna(subset=["brewery_id", "name"])
-        
-        # Enrichment
-        df = df.withColumn("name_upper", upper(df.name))
-        df = df.withColumn("location_id", concat(df.city, lit("_"), df.state))
-        
-        return df
-
-# spark_jobs/aggregation_gold.py - Gold Layer
-class AggregationJob(BaseJob):
-    """GOLD LAYER: Analytics & aggregations"""
-    
-    def extract(self) -> DataFrame:
-        return self.spark.read.parquet(f"{self.config.storage.path}/silver")
-    
-    def transform(self, df: DataFrame) -> DataFrame:
-        # Create aggregations for reporting
-        return df.groupBy("type", "state").agg(
-            count("brewery_id").alias("count"),
-            avg("beer_count").alias("avg_beers")
-        ).orderBy("state", "type")
-```
-
-### Alinhamento com Case Requirements
-
-| Requirement | Como Atendemos |
-|---|---|
-| **Scalability** | ✅ Cada camada é independente, fácil escalar |
-| **Data Integrity** | ✅ Bronze = cópia exata (auditável); Silver = validações aplicadas |
-| **Error Handling** | ✅ Erros em qualquer camada não afetam as outras |
-| **Documentation** | ✅ Padrão claro: cada layer tem responsabilidade específica |
-
-### Alternativas Consideradas
-
-| Alternativa | Pros | Cons | Decision |
-|---|---|---|---|
-| **Single Layer** | Simples | ❌ Sem auditoria; sem separação; difícil debug | Rejeitado |
-| **Lambda** | Real-time + batch | ❌ Overkill; muita complexidade | Rejeitado |
-| **Medallion** ✅ | Clara separação; auditável; escalável | ⚠️ Mais armazenamento | **ACEITO** |
-
 ---
 
 ## 2. Processing Engine - PySpark
 
 ### Context
 
-**Case Requirement:** ✅ Pagination + Partitioning, ✅ Scalability
+Case Requirement: Pagination + Partitioning, Scalability
 
-Precisa processar volumes de dados em paralelo (particionamento) e escalar de dev → produção.
+Must process data volumes in parallel (partitioning) and scale from dev → production.
 
 ### Decision: Apache Spark with Python API (PySpark)
 
-Escolhemos **PySpark** porque:
-- ✅ Partitioning nativo (parallelism automático)
-- ✅ Escalável (local → cluster → cloud)
-- ✅ Comunidade gigante + 10+ anos de maturity
-- ✅ Cloud-native (AWS Glue, Databricks, GCP Dataproc)
+We chose PySpark because:
+- Native partitioning (automatic parallelism)
+- Scalable (local → cluster → cloud)
+- Huge community + 10+ years maturity
+- Cloud-native (AWS Glue, Databricks, GCP Dataproc)
 
 ### Implementation
 
 #### Spark Configuration (Config-Driven)
 
-```python
+```yaml
 # config/environments/dev.yaml
 spark:
   app_name: bees-brewery-dev
@@ -246,42 +178,24 @@ class SparkSessionFactory:
             .getOrCreate()
 ```
 
-### Alinhamento com Case Requirements
-
-| Requirement | Como Atendemos |
-|---|---|
-| **Pagination + Partitioning** | ✅ Repartitioning por data/location; shufflePartitions configurável |
-| **Scalability** | ✅ Spark scales from laptop to 1000-node clusters |
-| **Data Integrity** | ✅ ACID semantics; fault-tolerant RDDs |
-| **Performance** | ✅ In-memory computation; lazy evaluation |
-
-### Alternativas Consideradas
-
-| Alternativa | Scalability | Partitioning | Community | Cloud Support | Decision |
-|---|---|---|---|---|---|
-| **Pandas** | ❌ Limited (memory-bound) | ❌ Manual | ✅ Huge | ❌ No | Rejeitado |
-| **Dask** | ⚠️ Complex API | ⚠️ Clunky | ⚠️ Small | ⚠️ Limited | Rejeitado |
-| **PySpark** ✅ | ✅ Excellent | ✅ Native | ✅ Huge | ✅ AWS/GCP/Azure | **ACEITO** |
-| **Polars** | ✅ Fast | ⚠️ New | ⚠️ Growing | ❌ No | Rejeitado (too new) |
-
 ---
 
 ## 3. Orchestration - Apache Airflow
 
 ### Context
 
-**Case Requirement:** ✅ Error Handling, ✅ Scheduling, ✅ Monitoring
+Case Requirement: Error Handling, Scheduling, Monitoring
 
-Precisa orquestrar jobs em sequência (ingestion → transformation → aggregation) com retry automático e monitoramento.
+Must orchestrate jobs in sequence (ingestion → transformation → aggregation) with automatic retry and monitoring.
 
 ### Decision: Apache Airflow
 
-Escolhemos **Airflow** porque:
-- ✅ Scheduling poderoso (cron-like syntax)
-- ✅ Error handling com retry policies
-- ✅ UI excelente para monitoramento
-- ✅ Comunidade gigante (Apache project)
-- ✅ Easy integration com Spark
+We chose Airflow because:
+- Powerful scheduling (cron-like syntax)
+- Error handling with retry policies
+- Excellent UI for monitoring
+- Huge community (Apache project)
+- Easy integration with Spark
 
 ### Implementation
 
@@ -358,42 +272,24 @@ with DAG(
 # (depend_on_past prevents running with failed upstream)
 ```
 
-### Alinhamento com Case Requirements
-
-| Requirement | Como Atendemos |
-|---|---|
-| **Error Handling** | ✅ Retry policies (2 retries, 5min delay) + alerts |
-| **Scheduling** | ✅ Cron-like schedule (daily at midnight) |
-| **Monitoring** | ✅ UI shows status, logs, retry counts |
-| **Resilience** | ✅ Automatic retries for transient failures |
-
-### Alternativas Consideradas
-
-| Alternativa | Scheduling | Error Handling | Monitoring | Community | Decision |
-|---|---|---|---|---|---|
-| **Cron Scripts** | ✅ Basic | ❌ None | ❌ None | N/A | Rejeitado |
-| **Prefect** | ✅ Good | ✅ Good | ⚠️ Basic | ⚠️ Growing | Rejeitado (smaller ecosystem) |
-| **Dagster** | ✅ Good | ✅ Good | ✅ Good | ⚠️ Growing | Rejeitado (overkill for this case) |
-| **Airflow** ✅ | ✅ Excellent | ✅ Excellent | ✅ Excellent | ✅ Huge | **ACEITO** |
-
 ---
 
 ## 4. Storage Format - Parquet
 
 ### Context
 
-**Case Requirement:** ✅ Performance, ✅ Scalability, ✅ Data Integrity
+Case Requirement: Performance, Scalability, Data Integrity
 
-Precisa armazenar dados de forma eficiente (compression, querying, partitioning).
+Must store data efficiently (compression, querying, partitioning).
 
 ### Decision: Apache Parquet Format
 
-Escolhemos **Parquet** porque:
-- ✅ Columnar format (efficient for analytics)
-- ✅ Built-in compression (reduces storage by 80%)
-- ✅ Partitioning support (Spark writes partitioned Parquet naturally)
-- ✅ Schema enforcement (data integrity)
-- ✅ Cloud storage optimized (S3, GCS)
+We chose Parquet because:
+- Columnar format (efficient for analytics)
+- Built-in compression (reduces storage by 80%)
+- Partitioning support (Spark writes partitioned Parquet naturally)
+- Schema enforcement (data integrity)
+- Cloud storage optimized (S3, GCS)
 
 ### Implementation
 
@@ -434,33 +330,15 @@ def extract(self) -> DataFrame:
     # Spark only reads matching partition directories
 ```
 
-### Alinhamento com Case Requirements
-
-| Requirement | Como Atendemos |
-|---|---|
-| **Performance** | ✅ Columnar format = fast queries; partitioning = parallel reads |
-| **Scalability** | ✅ Efficient storage = more data per disk; scales horizontally |
-| **Data Integrity** | ✅ Schema enforcement; schema evolution support |
-
-### Alternativas Consideradas
-
-| Alternativa | Compression | Partitioning | Schema | Cloud | Decision |
-|---|---|---|---|---|---|
-| **CSV** | ❌ No | ⚠️ Manual | ❌ No | ✅ Yes | Rejeitado (not scalable) |
-| **JSON** | ❌ No | ⚠️ Manual | ⚠️ Loose | ✅ Yes | Rejeitado (large files) |
-| **Parquet** ✅ | ✅ Yes (50-80%) | ✅ Native | ✅ Strict | ✅ Yes | **ACEITO** |
-| **Delta Lake** | ✅ Yes | ✅ Native | ✅ Strict | ✅ Yes | Post-Phase 1 (too much initially) |
-| **ORC** | ✅ Yes | ✅ Native | ✅ Strict | ⚠️ Limited | Rejeitado (Parquet more common) |
-
 ---
 
 ## 5. Error Handling Strategy
 
 ### Context
 
-**Case Requirement:** ✅ Robust Error Handling, ✅ Resilience
+Case Requirement: Robust Error Handling, Resilience
 
-Precisa lidar com múltiplos tipos de erros (data quality, storage, processing) de forma diferenciada.
+Must handle multiple error types (data quality, storage, processing) differently.
 
 ### Decision: Hierarchical Exception System with Structured Logging
 
@@ -550,40 +428,23 @@ default_args = {
 # 4. After all retries exhausted or non-retryable error, call alert_slack
 ```
 
-### Alinhamento com Case Requirements
-
-| Requirement | Como Atendemos |
-|---|---|
-| **Robust Error Handling** | ✅ Exception hierarchy + specific handling per type |
-| **Resilience** | ✅ Retry policies for transient errors; immediate alerts for data issues |
-| **Data Integrity** | ✅ Data quality errors block pipeline (don't load bad data) |
-| **Monitoring** | ✅ Structured logs for troubleshooting |
-
-### Alternativas Consideradas
-
-| Alternativa | Pros | Cons | Decision |
-|---|---|---|---|
-| **No Specific Handling** | Simple | ❌ Can't distinguish error types | Rejeitado |
-| **Flat Exception** | Simple | ❌ No differentiation | Rejeitado |
-| **Hierarchical + Logging** ✅ | Type-specific handling; audit trail | ⚠️ More code | **ACEITO** |
-
 ---
 
 ## 6. Containerization - Docker
 
 ### Context
 
-**Case Requirement:** ✅ Deployment, ✅ Environment Consistency
+Case Requirement: Deployment, Environment Consistency
 
-Precisa empacotar aplicação para rodar consistente em dev/staging/prod.
+Must package application to run consistently in dev/staging/prod.
 
 ### Decision: Docker for Container Orchestration
 
-Escolhemos **Docker** porque:
-- ✅ Reproducible environments (dev = staging = prod)
-- ✅ Easy deployment (single docker-compose.yaml)
-- ✅ Cloud-native (runs on Kubernetes, AWS ECS, etc)
-- ✅ Isolates dependencies (no "works on my machine")
+We chose Docker because:
+- Reproducible environments (dev = staging = prod)
+- Easy deployment (single docker-compose.yaml)
+- Cloud-native (runs on Kubernetes, AWS ECS, etc)
+- Isolates dependencies (no "works on my machine")
 
 ### Implementation
 
@@ -649,126 +510,52 @@ services:
       SPARK_RPC_AUTHENTICATION_ENABLED: "no"
 ```
 
-### Alinhamento com Case Requirements
-
-| Requirement | Como Atendemos |
-|---|---|
-| **Environment Consistency** | ✅ Docker ensures dev = prod |
-| **Deployment** | ✅ docker-compose up -d = production ready |
-| **Scalability** | ✅ Containers scale on K8s |
-
-### Alternativas Consideradas
-
-| Alternativa | Cons | Decision |
-|---|---|---|
-| **Virtual Environments** | ❌ "Works on my machine"; hard to replicate | Rejeitado |
-| **Docker** ✅ | Reproducible; cloud-native; industry standard | **ACEITO** |
-
 ---
 
 ## Technology Decision Matrix
 
-Resumo visual de todas as decisões tecnológicas:
+Summary of all technical decisions:
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ TECHNOLOGY DECISION MATRIX - Why Each Choice                     │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│ LAYER        TECHNOLOGY   REQUIREMENT   ALTERNATIVE   REASON    │
-│ ─────────────────────────────────────────────────────────────   │
-│ Data         Medallion    Scalability   Single layer  Flexibility│
-│              (3-layer)    + Integrity   + Lambda      + Auditability
-│                                                                  │
-│ Processing   PySpark      Partitioning  Pandas       Native      │
-│                           + Scalability Dask         partitioning│
-│                                         Polars        + Maturity  │
-│                                                                  │
-│ Orchestration Airflow     Error Hdlg   Prefect      Superior    │
-│                           + Monitoring  Dagster      UI +        │
-│                                         Cron         Community   │
-│                                                                  │
-│ Storage      Parquet      Performance   CSV         Columnar    │
-│              Format       + Integrity   JSON        format +    │
-│                                         ORC         compression │
-│                                                                  │
-│ Errors       Exceptions   Resilience    Flat        Type-       │
-│              Hierarchy    + Retries     exceptions  specific    │
-│                                                      handling    │
-│                                                                  │
-│ Deploy       Docker       Consistency   Venvs       Industry    │
-│                           + Scalability Manual      standard +  │
-│                                         setup       cloud-native│
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
-```
+| Component | Technology | Alternative | Reason |
+|-----------|-----------|------------|--------|
+| Data Layer | Medallion (3-layer) | Single layer | Auditability + separation |
+| Processing | Apache Spark | Pandas/Dask/Polars | Native partitioning + maturity |
+| Orchestration | Apache Airflow | Prefect/Dagster/Cron | Superior UI + community |
+| Storage Format | Parquet | CSV/JSON/ORC | Columnar + compression + partitioning |
+| Error Handling | Exception hierarchy | Flat exceptions | Type-specific handling |
+| Deployment | Docker | Virtual envs | Reproducible + cloud-native |
 
 ---
 
 ## Case Requirements Coverage
 
 ```
-✅ REQUIREMENT 1: Pagination + Data Partitioning
-   └─ Implemented in: Section 2 (PySpark - repartition strategy)
-   └─ Evidence: config.shuffle_partitions (dev:100, prod:500)
+Requirement 1: Pagination + Data Partitioning
+  - Implemented in: Section 2 (PySpark - repartition strategy)
+  - Evidence: config.shuffle_partitions (dev:100, prod:500)
 
-✅ REQUIREMENT 2: Automated Tests + Data Integrity  
-   └─ Implemented in: Section 5 (Error Handling - validation)
-   └─ Evidence: DataQualityException checks before load
+Requirement 2: Automated Tests + Data Integrity
+  - Implemented in: Section 5 (Error Handling - validation)
+  - Evidence: DataQualityException checks before load
 
-✅ REQUIREMENT 3: Scalable Architecture
-   └─ Implemented in: Section 1 (Medallion) + Section 2 (Spark)
-   └─ Evidence: Multi-layer + config-driven partitions
+Requirement 3: Scalable Architecture
+  - Implemented in: Section 1 (Medallion) + Section 2 (Spark)
+  - Evidence: Multi-layer + config-driven partitions
 
-✅ REQUIREMENT 4: Robust Error Handling
-   └─ Implemented in: Section 3 (Airflow retries) + Section 5 (Exceptions)
-   └─ Evidence: Retry policies + exception hierarchy
+Requirement 4: Robust Error Handling
+  - Implemented in: Section 3 (Airflow retries) + Section 5 (Exceptions)
+  - Evidence: Retry policies + exception hierarchy
 
-✅ REQUIREMENT 5 & 6: Git Best Practices + Documentation
-   └─ Implemented in: All sections + clear separation of concerns
-   └─ Evidence: Each technology has clear responsibility
+Requirement 5 & 6: Git Best Practices + Documentation
+  - Implemented in: All sections + clear separation of concerns
+  - Evidence: Each technology has clear responsibility
 
-✅ DEPLOYMENT: Production Ready
-   └─ Implemented in: Section 6 (Docker)
-   └─ Evidence: docker-compose.yaml ready to run
+Deployment: Production Ready
+  - Implemented in: Section 6 (Docker)
+  - Evidence: docker-compose.yaml ready to run
 ```
 
 ---
 
-## References
-
-### Medallion Architecture
-- [Databricks: Medallion Architecture](https://www.databricks.com/blog/2022/06/24/use-the-medallion-lakehouse-architecture-to-build-data-platforms-on-databricks.html)
-
-### PySpark
-- [Apache Spark Documentation](https://spark.apache.org/docs/latest/api/python/)
-- [PySpark Best Practices](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
-- [Partitioning Guide](https://spark.apache.org/docs/latest/sql-data-sources-parquet.html#partition-discovery)
-
-### Airflow
-- [Apache Airflow Documentation](https://airflow.apache.org/docs/)
-- [Error Handling & Retry Policies](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/taskflow.html)
-
-### Parquet
-- [Parquet Format Documentation](https://parquet.apache.org/)
-- [Compression & Performance](https://parquet.apache.org/docs/file-format/data-types/)
-
-### Docker
-- [Docker Documentation](https://docs.docker.com/)
-- [Docker Compose for Airflow](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose-quickstart.html)
-
----
-
-**Last Updated:** 2026-02-01  
-**Status:** ✅ Accepted & Implemented  
-**Supersedes:** 
-- ADR-002: Airflow Orchestration Strategy
-- ADR-003: PySpark Transformations Pattern
-- ADR-004: Docker Containerization
-- ADR-005: Parquet Storage Format
-- ADR-006: Error Handling Strategy
-
-**Related:**
-- ADR-001: Modular and Scalable Data Pipeline Architecture (architectural foundation)
-- REQUIREMENTS_MAPPING.md (requirement traceability)
-- ARCHITECTURE_IMPLEMENTATION.md (implementation guide)
+Last Updated: 2026-02-01  
+Status: Accepted and Implemented  

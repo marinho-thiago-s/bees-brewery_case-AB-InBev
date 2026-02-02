@@ -1,12 +1,12 @@
-# 🔧 TROUBLESHOOTING - Guia de Diagnóstico e Correção
+# TROUBLESHOOTING - Diagnostics and Resolution Guide
 
-**Status:** ✅ Complete Guide  
-**Last Updated:** 2026-02-02  
-**Covers:** All issues encountered and solutions
+Status: Complete Guide
+Last Updated: 2026-02-02
+Covers: All issues encountered and solutions
 
 ---
 
-## 📋 Índice de Problemas
+## Problem Index
 
 1. [Spark Type Conflicts](#1-spark-type-conflicts)
 2. [DAG Task Hanging](#2-dag-task-hanging)
@@ -19,20 +19,20 @@
 
 ## 1. Spark Type Conflicts
 
-### Problema: "Can not merge type DoubleType and LongType"
+### Problem: "Can not merge type DoubleType and LongType"
 
-**Sintomas:**
+**Symptoms:**
 ```
 pyspark.sql.utils.AnalysisException: Can not merge type DoubleType and LongType
 ```
 
-**Causa Raiz:**
-- API OpenBrewery retorna valores numéricos inconsistentes
-- Alguns como float (ex: `36.7749`), outros como int (ex: `12345`)
-- Spark tenta inferir schema automaticamente em cada partição
-- Spark não consegue reconciliar tipos diferentes no mesmo campo
+**Root Cause:**
+- OpenBrewery API returns inconsistent numeric values
+- Some as float (ex: `36.7749`), others as int (ex: `12345`)
+- Spark auto-infers schema on each partition
+- Spark cannot reconcile different types in same field
 
-**Solução Implementada:**
+**Implemented Solution:**
 
 ```python
 # spark_jobs/ingestion.py
@@ -56,28 +56,28 @@ def execute(self) -> None:
     # ...
     all_data = []  # Collect all API pages
     
-    # 1️⃣ NORMALIZE: Convert to strings BEFORE creating DataFrame
+    # 1. NORMALIZE: Convert to strings BEFORE creating DataFrame
     normalized_data = self._normalize_data(all_data)
     
-    # 2️⃣ USE EXPLICIT SCHEMA: Don't let Spark infer
+    # 2. USE EXPLICIT SCHEMA: Don't let Spark infer
     df = self.spark.createDataFrame(
         normalized_data, 
         schema=BronzeSchema.BREWERIES_SCHEMA  # All StringType
     )
 ```
 
-**Por que funciona:**
-- ✅ Todos os valores são strings → sem conflito de tipo
-- ✅ Schema explícito → Spark usa schema definido, não infere
-- ✅ Normalização antecipada → evita problemas em paralelo
+**Why It Works:**
+- All values are strings, no type conflict
+- Explicit schema, Spark uses defined schema not inferred
+- Early normalization avoids parallel processing issues
 
-**Teste:**
+**Test:**
 ```bash
 docker-compose exec -T airflow-webserver python3 << 'PYTHON'
 from pyspark.sql import SparkSession
 spark = SparkSession.builder.appName("test").getOrCreate()
 df = spark.read.parquet("/opt/airflow/datalake/bronze/breweries/created_at=2026-02-02")
-print(f"✅ Bronze Data: {df.count():,} records without type errors")
+print(f"Bronze Data: {df.count():,} records without type errors")
 PYTHON
 ```
 
@@ -85,34 +85,34 @@ PYTHON
 
 ## 2. DAG Task Hanging
 
-### Problema: Tasks ficam em `[running]` indefinidamente
+### Problem: Tasks stay in `[running]` indefinitely
 
-**Sintomas:**
+**Symptoms:**
 ```
 [DAG TEST] end task task_id=ingestion_bronze
 WARNING - No tasks to run. unrunnable tasks: {transformation_silver [running], aggregation_gold [None]}
 ```
 
-**Causa Raiz:**
-- TransformationJob procurava por dados em caminho **sem partição de data**
-- Mas IngestionJob salvava dados **com partição de data** (`created_at=2026-02-02`)
-- TransformationJob não encontrava dados → travava tentando ler
+**Root Cause:**
+- TransformationJob looked for data in path **without date partition**
+- But IngestionJob saved data **with date partition** (`created_at=2026-02-02`)
+- TransformationJob couldn't find data, hung trying to read
 
-**Exemplo do Bug:**
+**Bug Example:**
 ```python
-# ❌ ANTES - Procurava por bronze/breweries (sem data)
+# BEFORE - looked for bronze/breweries (no date)
 bronze_path = "bronze/breweries"
 df = self.storage.read(bronze_path, format="parquet")
 
-# Mas IngestionJob salvava em:
+# But IngestionJob saved to:
 # bronze/breweries/created_at=2026-02-02/
-# → ERRO: Arquivo não encontrado!
+# ERROR: File not found!
 ```
 
-**Solução Implementada:**
+**Implemented Solution:**
 
 ```python
-# ✅ DEPOIS - Adicionar execution_date aos Jobs
+# AFTER - Add execution_date to Jobs
 
 # dags/bees_brewery_dag.py
 def run_transformation(**context):
@@ -122,7 +122,7 @@ def run_transformation(**context):
     job = TransformationJob(
         config, 
         storage,
-        execution_date=execution_date  # ✅ Pass to job
+        execution_date=execution_date  # Pass to job
     )
     job.execute()
 
@@ -134,25 +134,25 @@ class TransformationJob(BaseJob):
         self.execution_date = execution_date or datetime.now().strftime('%Y-%m-%d')
     
     def execute(self) -> None:
-        # ✅ USE execution_date for partition
+        # USE execution_date for partition
         bronze_path = f"bronze/breweries/created_at={self.execution_date}"
         df = self.storage.read(bronze_path, format="parquet")
 ```
 
-**Por que funciona:**
-- ✅ Airflow passa execution_date via context
-- ✅ Job usa data exata para localizar dados particionados
-- ✅ Caminho sempre bate: `bronze/breweries/created_at=2026-02-02/`
+**Why It Works:**
+- Airflow passes execution_date via context
+- Job uses exact date to locate partitioned data
+- Path always matches: `bronze/breweries/created_at=2026-02-02/`
 
-**Teste:**
+**Test:**
 ```bash
-# Trigger DAG e monitorar
+# Trigger DAG and monitor
 docker-compose exec -T airflow-webserver bash -c \
   "airflow dags trigger bees_brewery_medallion && \
    sleep 5 && \
    airflow dags test bees_brewery_medallion 2026-02-02"
 
-# Verificar nos logs
+# Check logs
 docker-compose logs airflow-scheduler | grep "TaskInstance Finished"
 ```
 
@@ -160,34 +160,34 @@ docker-compose logs airflow-scheduler | grep "TaskInstance Finished"
 
 ## 3. Data Validation Errors
 
-### Problema: `_validate_not_null()` retorna TypeError
+### Problem: `_validate_not_null()` returns TypeError
 
-**Sintomas:**
+**Symptoms:**
 ```
 TypeError: unsupported operand type(s) for +: 'int' and 'NoneType'
 ```
 
-**Causa Raiz:**
+**Root Cause:**
 ```python
-# ❌ ANTES - Usar sum() em valores que podem ser None
+# BEFORE - Using sum() on values that can be None
 null_counts_row = df.select([
     spark_sum(col(c).isNull().cast("int")).alias(c) for c in columns
 ]).collect()[0]
 
 total_nulls = sum(null_counts_row.asDict().values())
-# Se alguns valores são None, sum() falha!
+# If some values are None, sum() fails!
 ```
 
-**Solução Implementada:**
+**Implemented Solution:**
 
 ```python
-# ✅ DEPOIS - Usar filter().count() e tratar None
+# AFTER - Use filter().count() and handle None
 
 def _validate_not_null(self, df: DataFrame, columns: list) -> int:
     """Count null values in specified columns"""
     from pyspark.sql.functions import col
     
-    # Method 1: Filter + count (mais Pythônico)
+    # Method 1: Filter + count (more Pythonic)
     null_counts = {}
     for column in columns:
         null_count = df.filter(col(column).isNull()).count()
@@ -205,34 +205,34 @@ def _validate_not_null(self, df: DataFrame, columns: list) -> int:
     return total_nulls
 ```
 
-**Por que funciona:**
-- ✅ `count()` sempre retorna int (nunca None)
-- ✅ List comprehension com `if v is not None` garante apenas ints
-- ✅ Mais legível: "contar nulos" vs "somar booleanos"
+**Why It Works:**
+- `count()` always returns int (never None)
+- List comprehension with `if v is not None` ensures only ints
+- More readable: "count nulls" vs "sum booleans"
 
-**Teste:**
+**Test:**
 ```bash
 docker-compose exec -T airflow-webserver pytest tests/test_transformation.py::test_transform_silver_success -v
-# ✅ PASSED
+# PASSED
 ```
 
 ---
 
 ## 4. Docker Issues
 
-### Problema 4a: Container não inicia
+### Problem 4a: Container fails to start
 
-**Sintomas:**
+**Symptoms:**
 ```
 ERROR: Service airflow-webserver failed to build
 ```
 
-**Solução:**
+**Solution:**
 ```bash
-# 1. Remove containers e volumes
+# 1. Remove containers and volumes
 docker-compose down -v
 
-# 2. Rebuild sem cache
+# 2. Rebuild without cache
 docker-compose build --no-cache
 
 # 3. Start fresh
@@ -245,9 +245,9 @@ sleep 60
 docker-compose ps
 ```
 
-### Problema 4b: Porta 8080 já em uso
+### Problem 4b: Port 8080 already in use
 
-**Solução:**
+**Solution:**
 ```bash
 # Find process using port 8080
 lsof -i :8080
@@ -260,9 +260,9 @@ kill -9 <PID>
 #   - "8081:8080"
 ```
 
-### Problema 4c: "Cannot connect to Docker daemon"
+### Problem 4c: "Cannot connect to Docker daemon"
 
-**Solução:**
+**Solution:**
 ```bash
 # Ensure Docker Desktop is running
 # macOS: Open Docker.app from Applications
@@ -278,19 +278,19 @@ docker ps
 
 ## 5. Testing Failures
 
-### Problema 5a: "Bronze data está vazio" em testes
+### Problem 5a: "Bronze data is empty" in tests
 
-**Sintomas:**
+**Symptoms:**
 ```
-ValueError: Bronze data está vazio!
+ValueError: Bronze data is empty!
 ```
 
-**Causa:**
-- Fixture cria dados em `tmp_path/bronze/breweries` (sem partição)
-- Função `transform()` procura em `tmp_path/bronze/breweries/created_at=2026-02-02` (com partição)
-- Não encontra → erro
+**Cause:**
+- Fixture creates data in `tmp_path/bronze/breweries` (no partition)
+- Function `transform()` looks in `tmp_path/bronze/breweries/created_at=2026-02-02` (with partition)
+- Not found, fails
 
-**Solução (já implementada):**
+**Implemented Solution:**
 ```python
 # spark_jobs/transformation_silver.py
 
@@ -300,35 +300,35 @@ def transform(spark, input_path: str, output_path: str) -> str:
     bronze_base = f"{input_path}/bronze/breweries"
     
     try:
-        # Tentar SEM partição (testes usam isso)
+        # Try WITHOUT partition (tests use this)
         if exists(bronze_base):
             df = spark.read.parquet(bronze_base)
         else:
-            # Tentar COM partição (DAG usa isso)
+            # Try WITH partition (DAG uses this)
             current_date = datetime.now().strftime('%Y-%m-%d')
             bronze_path = f"{bronze_base}/created_at={current_date}"
             if exists(bronze_path):
                 df = spark.read.parquet(bronze_path)
             else:
-                raise ValueError("Bronze data está vazio!")
+                raise ValueError("Bronze data is empty!")
     except Exception as e:
-        raise ValueError(f"Bronze data está vazio! Erro: {str(e)}")
+        raise ValueError(f"Bronze data is empty! Error: {str(e)}")
 ```
 
-**Teste:**
+**Test:**
 ```bash
 docker-compose exec -T airflow-webserver pytest tests/ -v
-# ✅ 24 PASSED
+# 24 PASSED
 ```
 
-### Problema 5b: "ModuleNotFoundError: No module named 'pyspark'"
+### Problem 5b: "ModuleNotFoundError: No module named 'pyspark'"
 
-**Solução:**
+**Solution:**
 ```bash
-# Dentro do container (onde PySpark está instalado)
+# Inside container (where PySpark is installed)
 docker-compose exec -T airflow-webserver pytest tests/ -v
 
-# OU instalar localmente (opcional)
+# OR install locally (optional)
 pip install pyspark pytest pytest-cov
 ```
 
@@ -336,42 +336,42 @@ pip install pyspark pytest pytest-cov
 
 ## 6. Performance Issues
 
-### Problema 6a: Spark startup lento
+### Problem 6a: Spark startup slow
 
-**Causa:** Spark master externo em dev (comunicação overhead)
+**Cause:** Spark master external in dev (communication overhead)
 
-**Solução (já implementada):**
+**Implemented Solution:**
 ```yaml
 # config/environments/dev.yaml
 spark:
-  master: local[*]  # ✅ Local mode (rápido)
+  master: local[*]  # Local mode (fast)
 
 # config/environments/prod.yaml
 spark:
-  master: yarn      # Cluster mode (escalável)
+  master: yarn      # Cluster mode (scalable)
 ```
 
 **Benchmark:**
 ```
-Before:  ~60s (com retries)
-After:   ~39s (primeira tentativa com local[*])
+Before:  ~60s (with retries)
+After:   ~39s (first attempt with local[*])
 ```
 
-### Problema 6b: Muitas partições = overhead
+### Problem 6b: Many partitions = overhead
 
-**Solução:**
+**Solution:**
 ```python
-# Configurar shuffle_partitions por ambiente
-# dev.yaml: shuffle_partitions: 100  (rápido, dev)
-# prod.yaml: shuffle_partitions: 500 (escalável, prod)
+# Configure shuffle_partitions per environment
+# dev.yaml: shuffle_partitions: 100  (fast, dev)
+# prod.yaml: shuffle_partitions: 500 (scalable, prod)
 
-# Usar config
+# Use config
 df = df.coalesce(self.config.spark.shuffle_partitions)
 ```
 
-### Problema 6c: "Executor memory exceeded"
+### Problem 6c: "Executor memory exceeded"
 
-**Solução:**
+**Solution:**
 ```yaml
 # config/environments/prod.yaml
 spark:
@@ -383,44 +383,44 @@ spark:
 
 ---
 
-## Matriz de Diagnóstico Rápido
+## Quick Diagnosis Matrix
 
-| Erro | Camada | Causa | Solução |
-|------|--------|-------|---------|
-| DoubleType + LongType | Spark | Schema inference | Use StringType explícito |
-| "No tasks to run" | DAG | Partition mismatch | Adicione execution_date |
-| TypeError in validate | Job | None em sum() | Use count() + filter |
-| "Data está vazio" | Test | Path mismatch | Torne função flexível |
-| Port 8080 em uso | Docker | Outro processo | Kill ou mude porta |
-| PySpark not found | Python | Não instalado | Rode dentro do container |
-
----
-
-## Checklist de Debugging
-
-Quando algo não funciona:
-
-- [ ] Verificar logs: `docker-compose logs -f airflow-scheduler`
-- [ ] Verificar DAG UI: http://localhost:8080
-- [ ] Verificar dados existem: `docker-compose exec -T airflow-webserver python3 << 'verify_data.py'`
-- [ ] Rodar testes: `docker-compose exec -T airflow-webserver pytest tests/ -v`
-- [ ] Reiniciar containers: `docker-compose down && docker-compose up -d`
-- [ ] Verificar config: `cat config/environments/dev.yaml`
-- [ ] Verificar storage: `ls -la datalake/bronze/`
+| Error | Layer | Cause | Solution |
+|------|-------|-------|---------|
+| DoubleType + LongType | Spark | Schema inference | Use explicit StringType |
+| "No tasks to run" | DAG | Partition mismatch | Add execution_date |
+| TypeError in validate | Job | None in sum() | Use count() + filter |
+| "Data is empty" | Test | Path mismatch | Make function flexible |
+| Port 8080 in use | Docker | Another process | Kill or change port |
+| PySpark not found | Python | Not installed | Run in container |
 
 ---
 
-## Quando Pedir Ajuda
+## Debugging Checklist
 
-Forneça:
-1. **Erro completo** (copiar stack trace)
-2. **Comando que rodou** (como reproduzir)
-3. **Contexto** (dev? prod? qual versão?)
-4. **O que já tentou** (ajustes feitos)
+When something doesn't work:
+
+- [ ] Check logs: `docker-compose logs -f airflow-scheduler`
+- [ ] Check DAG UI: http://localhost:8080
+- [ ] Check data exists: `docker-compose exec -T airflow-webserver python3 << 'verify_data.py'`
+- [ ] Run tests: `docker-compose exec -T airflow-webserver pytest tests/ -v`
+- [ ] Restart containers: `docker-compose down && docker-compose up -d`
+- [ ] Check config: `cat config/environments/dev.yaml`
+- [ ] Check storage: `ls -la datalake/bronze/`
 
 ---
 
-## 📚 Referências
+## When Asking for Help
+
+Provide:
+1. **Complete error** (copy stack trace)
+2. **Command that ran** (how to reproduce)
+3. **Context** (dev? prod? which version?)
+4. **What you already tried** (adjustments made)
+
+---
+
+## References
 
 - [Spark Type System](https://spark.apache.org/docs/latest/sql-ref-datatypes.html)
 - [Airflow Error Handling](https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/errors.html)
@@ -429,6 +429,6 @@ Forneça:
 
 ---
 
-**Last Updated:** 2026-02-02  
-**Issues Resolved:** 4 major + 6 categories  
-**All Tests Passing:** ✅ 24/24
+Last Updated: 2026-02-02
+Issues Resolved: 4 major + 6 categories
+All Tests Passing: 24/24
