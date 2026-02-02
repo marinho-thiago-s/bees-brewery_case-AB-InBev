@@ -1,161 +1,160 @@
 # BEES Brewery Case - ETL Pipeline
 
-Pipeline de ETL completo para processamento de dados do caso BEES Brewery, utilizando arquitetura Medallion (Bronze, Silver, Gold) com Airflow e Spark.
+Complete ETL pipeline for processing BEES Brewery case data, using Medallion architecture (Bronze, Silver, Gold) with Airflow and Spark.
 
-## 📚 Documentação
+## Documentation
 
-**Leia primeiro:**
-1. 📘 **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Visão geral da arquitetura + decisões técnicas
-2. 📗 **[IMPLEMENTATION.md](docs/IMPLEMENTATION.md)** - Setup, deployment e histórico de ajustes
-3. 📕 **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Diagnóstico e solução de problemas
+**Read first:**
+1. **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Architecture overview and technical decisions
+2. **[IMPLEMENTATION.md](docs/IMPLEMENTATION.md)** - Setup, deployment and adjustment history
+3. **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Diagnosis and troubleshooting
 
-**Decisões Arquiteturais:**
-- 📋 **[ADRs Index](docs/adr/README.md)** - Architecture Decision Records
-- 📌 **[ADR-001](docs/adr/ADR-001-modular-architecture.md)** - Arquitetura Modular
-- 📌 **[ADR-002](docs/adr/ADR-002-TECH-STACK.md)** - Stack Tecnológico
+**Architectural Decisions:**
+- **[ADRs Index](docs/adr/README.md)** - Architecture Decision Records
+- **[ADR-001](docs/adr/ADR-001-modular-architecture.md)** - Modular Architecture
+- **[ADR-002](docs/adr/ADR-002-TECH-STACK.md)** - Technology Stack
 
 ---
 
-## 📋 Estrutura do Projeto
+## Project Structure
 
 ```
 bees-brewery-case/
-├── dags/                  # DAGs do Airflow
+├── dags/                  # Airflow DAGs
 │   └── bees_brewery_dag.py
-├── spark_jobs/            # Scripts PySpark segregados
+├── spark_jobs/            # Segregated PySpark scripts
 │   ├── ingestion.py       # API -> Bronze
-│   ├── transformation.py  # Bronze -> Silver
-│   └── aggregation.py     # Silver -> Gold
-├── tests/                 # Testes unitários (PyTest)
+│   ├── transformation_silver.py  # Bronze -> Silver
+│   ├── aggregation_gold.py       # Silver -> Gold
+│   └── base_job.py        # Base pattern
+├── tests/                 # Unit tests (PyTest)
 │   ├── test_ingestion.py
 │   ├── test_transformation.py
-│   └── test_aggregation.py
-├── docker/                # Dockerfiles customizados
+│   ├── test_aggregation.py
+│   └── test_architecture.py
+├── core/                  # Core services
+│   ├── storage.py         # Storage abstraction
+│   ├── spark_session.py   # Spark factory
+│   ├── logger.py          # Structured logging
+│   └── exceptions.py      # Custom exceptions
+├── config/                # Configuration management
+│   ├── config.py          # Config dataclasses
+│   └── environments/      # YAML configs
+│       ├── dev.yaml
+│       └── prod.yaml
+├── schemas/               # Data contracts
+│   └── bronze.py
+├── docker/                # Custom Dockerfiles
+│   ├── Dockerfile.airflow
 │   └── Dockerfile.spark
-├── docker-compose.yaml    # Orquestração de containers
-└── requirements.txt       # Dependências Python
+├── docker-compose.yaml    # Container orchestration
+└── requirements.txt       # Python dependencies
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
-### Pré-requisitos
+### Prerequisites
 
-- Docker e Docker Compose instalados
-- Python 3.9+
+- Docker and Docker Compose installed
+- Python 3.12+
 - Git
 
-### 1. Clonar o repositório
+### 1. Clone the repository
 
 ```bash
 git clone <repository-url>
 cd bees-brewery-case
 ```
 
-### 2. Instalar dependências
+### 2. Install dependencies (optional - Docker recommended)
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Iniciar containers (Airflow + Spark)
+### 3. Start containers (Airflow + Spark)
 
 ```bash
 docker-compose up -d
 ```
 
-### 4. Acessar interfaces
+Wait 30-45 seconds for initialization.
 
-- **Airflow UI**: http://localhost:8080
-- **Spark Master**: http://localhost:8080
+### 4. Access interfaces
 
-## 📚 Componentes
+- **Airflow UI**: http://localhost:8080 (airflow / airflow)
+- **Spark Master**: http://localhost:8081
+
+### 5. Trigger pipeline
+
+```bash
+# Enter Airflow container
+docker-compose exec airflow-webserver bash
+
+# Unpause and trigger DAG
+airflow dags unpause bees_brewery_medallion
+airflow dags trigger bees_brewery_medallion
+```
+
+## Components
 
 ### Ingestion (Bronze Layer)
 
-**Arquivo**: `spark_jobs/ingestion.py`
+**File**: `spark_jobs/ingestion.py`
 
-Responsável por extrair dados da API BEES e armazenar na camada Bronze em formato parquet.
+Fetches data from OpenBrewery DB API and stores in Bronze layer as Parquet.
 
-**Principais métodos**:
-- `fetch_data_from_api()`: Busca dados da API
-- `create_bronze_dataframe()`: Cria DataFrame a partir dos dados
-- `save_to_bronze()`: Salva dados em formato parquet
-- `ingest()`: Executa pipeline completo
+**Main methods**:
+- `fetch_data_from_api()`: Fetches paginated data from API
+- `execute()`: Normalizes data and creates Bronze DataFrame
+- Data validation via `_validate_not_null()`
 
-**Exemplo de uso**:
-```python
-from pyspark.sql import SparkSession
-from spark_jobs.ingestion import BeesIngestion
-
-spark = SparkSession.builder.appName("Ingestion").getOrCreate()
-ingestion = BeesIngestion(spark, "https://api.example.com", api_key="key")
-ingestion.ingest("customers", "customers", "/data")
-```
+**How it meets case requirements**:
+- Pagination: API pagination + Spark partitions
+- Data integrity: Schema enforcement + validation
+- Error handling: Custom exceptions + logging
 
 ### Transformation (Silver Layer)
 
-**Arquivo**: `spark_jobs/transformation.py`
+**File**: `spark_jobs/transformation_silver.py`
 
-Responsável por limpeza, validação e transformação de dados de Bronze para Silver.
+Cleans, validates and enriches data from Bronze to Silver.
 
-**Principais métodos**:
-- `clean_data()`: Remove duplicatas e normaliza strings
-- `validate_data()`: Valida colunas obrigatórias e nulos
-- `enrich_data()`: Adiciona metadados (timestamp, ID único)
-- `save_to_silver()`: Salva dados em Silver
-- `transform()`: Executa pipeline completo
+**Main methods**:
+- `extract()`: Reads from Bronze
+- `transform()`: Removes duplicates, normalizes, validates
+- `load()`: Saves to Silver with partitions
 
-**Exemplo de uso**:
-```python
-from spark_jobs.transformation import BeesTransformation
-
-transformation = BeesTransformation(spark)
-df = transformation.transform(
-    "/data/bronze/customers",
-    "customers",
-    "/data",
-    required_columns=["id", "name", "email"]
-)
-```
+**Data quality checks**:
+- Removes null values in required fields
+- Deduplicates records
+- Normalizes strings (trim whitespace)
 
 ### Aggregation (Gold Layer)
 
-**Arquivo**: `spark_jobs/aggregation.py`
+**File**: `spark_jobs/aggregation_gold.py`
 
-Responsável por agregações, análises e métricas de negócio em Gold.
+Creates aggregations and business metrics from Silver to Gold.
 
-**Principais métodos**:
-- `aggregate_by_group()`: Agrupa e aplica funções de agregação
-- `apply_filters()`: Filtra dados
-- `sort_data()`: Ordena dados
-- `calculate_metrics()`: Calcula métricas customizadas
-- `save_to_gold()`: Salva dados em Gold
-- `aggregate()`: Executa pipeline completo
+**Main methods**:
+- `extract()`: Reads from Silver
+- `transform()`: Groups and aggregates by state/type
+- `load()`: Saves analytics-ready data
 
-**Exemplo de uso**:
-```python
-from spark_jobs.aggregation import BeesAggregation
+**Metrics**:
+- Count by brewery_type and state
+- Top combinations calculated
+- Ready for BI/dashboards
 
-aggregation = BeesAggregation(spark)
-df = aggregation.aggregate(
-    "/data/silver/sales",
-    "sales_summary",
-    "/data",
-    group_by_cols=["category"],
-    agg_specs={"amount": "sum", "quantity": "avg"},
-    sort_columns=[("amount", "desc")]
-)
-```
+## Tests
 
-## 🧪 Testes
-
-Executar todos os testes:
+Run all tests:
 
 ```bash
 pytest tests/ -v
 ```
 
-Executar testes de um módulo específico:
+Run tests for specific module:
 
 ```bash
 pytest tests/test_ingestion.py -v
@@ -163,115 +162,180 @@ pytest tests/test_transformation.py -v
 pytest tests/test_aggregation.py -v
 ```
 
-Com cobertura:
+With coverage:
 
 ```bash
-pytest tests/ --cov=spark_jobs --cov-report=html
+pytest tests/ --cov=spark_jobs --cov-report=term-missing
 ```
 
-## 🔄 Fluxo de Dados
+Expected: 24 tests passing, ~80% coverage
+
+## Data Flow
 
 ```
-API BEES
-   ↓
-[Ingestion Task] → Bronze Layer (Parquet)
-   ↓
-[Transformation Task] → Silver Layer (Parquet)
-   ↓
-[Aggregation Task] → Gold Layer (Parquet)
-   ↓
-[Validation Task] → Data Quality Checks
+OpenBrewery API
+        |
+        v
+[Ingestion Task] -> Bronze Layer (9.083 records, raw)
+        |
+        v
+[Transformation Task] -> Silver Layer (5.451 records, cleaned)
+        |
+        v
+[Aggregation Task] -> Gold Layer (389 aggregations)
+        |
+        v
+[Validation] -> Data Quality Checks
 ```
 
-## 📊 Camadas Medallion
+## Medallion Layers
 
 ### Bronze
-- Dados brutos da API
-- Sem transformações
-- Formato: Parquet
-- Retenção: Indefinida
+- Raw data from API (immutable)
+- No transformations applied
+- Format: Parquet
+- Records: 9.083 breweries
+- Retention: Indefinite
 
 ### Silver
-- Dados limpos e validados
-- Duplicatas removidas
-- Strings normalizadas
-- Metadados adicionados
-- Formato: Parquet
+- Cleaned and validated data
+- Duplicates removed (60% retention)
+- Strings normalized
+- Metadata added (ingestion timestamp)
+- Format: Parquet (date partitioned)
+- Records: 5.451 breweries
 
 ### Gold
-- Dados agregados e analisados
-- Métricas de negócio
-- Dados prontos para BI/Analytics
-- Formato: Parquet
+- Aggregated and analyzed data
+- Business metrics (counts by state/type)
+- Data ready for BI/Analytics/Dashboards
+- Format: Parquet
+- Aggregations: 389 combinations
 
-## ⚙️ Configuração
+## Configuration
 
-### Variáveis de Ambiente
+### Environment Variables
 
-Criar arquivo `.env` na raiz do projeto:
+Configuration is YAML-based in `config/environments/`:
 
-```env
-# API
-API_URL=https://api.example.com
-API_KEY=your-api-key
+**dev.yaml** - Development
+```yaml
+spark:
+  master: local[*]
+  shuffle_partitions: 100
+```
 
-# Spark
-SPARK_MASTER=spark://localhost:7077
-SPARK_MEMORY=2g
-
-# Data paths
-DATA_PATH=/data
-
-# Airflow
-AIRFLOW_HOME=/opt/airflow
+**prod.yaml** - Production
+```yaml
+spark:
+  master: yarn
+  shuffle_partitions: 500
 ```
 
 ### docker-compose.yaml
 
-Configurar services:
-- Airflow Webserver
-- Airflow Scheduler
-- Spark Master
+Defines services:
+- Airflow Webserver (scheduler UI)
+- Airflow Scheduler (DAG executor)
+- Spark Master (computation engine)
 - Spark Worker(s)
-- PostgreSQL (Airflow metadata)
+- PostgreSQL (Airflow metadata database)
 
-## 🐳 Docker
+## Docker
 
-### Build customizado da imagem Spark
-
-```bash
-docker build -f docker/Dockerfile.spark -t bees-spark:latest .
-```
-
-### Executar job Spark diretamente
+### Build images
 
 ```bash
-docker exec -it bees-spark-master spark-submit \
-  --class org.apache.spark.examples.SparkPi \
-  /opt/spark/examples/jars/spark-examples_2.12-3.5.0.jar \
-  100
+docker-compose build
 ```
 
-## 📝 Logs
-
-Logs são salvos em `/logs`:
+### Run pipeline
 
 ```bash
-tail -f logs/spark_jobs.log
-tail -f logs/airflow_scheduler.log
+docker-compose up -d
 ```
 
-## 🤝 Contribuindo
+### View logs
 
-1. Criar branch feature: `git checkout -b feature/sua-feature`
-2. Commit changes: `git commit -am 'Adiciona nova feature'`
-3. Push to branch: `git push origin feature/sua-feature`
-4. Abrir Pull Request
+```bash
+docker-compose logs -f airflow-scheduler
+docker-compose logs -f spark-master
+```
 
-## 📞 Suporte
+### Stop everything
 
-Para dúvidas e issues, abrir uma issue no repositório.
+```bash
+docker-compose down
+```
 
-## 📄 Licença
+### Clean volumes (fresh start)
 
-Projeto BEES Brewery Case - Todos os direitos reservados.
+```bash
+docker-compose down -v
+docker-compose up -d
+```
+
+## Logs
+
+Logs are saved in `logs/` directory:
+
+```bash
+# Airflow logs
+tail -f logs/dag_id=bees_brewery_medallion/*/task_id=*/attempt=1.log
+
+# Docker logs
+docker-compose logs -f airflow-scheduler
+```
+
+## Architecture
+
+For detailed architecture information, see:
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Layered architecture overview
+- [ADR-001](docs/adr/ADR-001-modular-architecture.md) - Why modular design
+- [ADR-002](docs/adr/ADR-002-TECH-STACK.md) - Why these technologies
+
+### Key Design Patterns
+
+1. **Medallion Pattern** - Three-layer data architecture
+2. **BaseJob Pattern** - Unified ETL interface with common error handling
+3. **Dependency Injection** - Storage and Spark injected, not hardcoded
+4. **Factory Pattern** - SparkSession and Storage created via factories
+5. **Configuration Management** - YAML-based, multi-environment support
+
+## Case Requirements Coverage
+
+This project meets all 6 Bees case requirements:
+
+1. **Pagination + Data Partitioning** - Spark partitions + API pagination
+2. **Automated Tests + Data Integrity** - 24 tests + validation layer
+3. **Scalable Architecture** - Modular design + multi-backend support
+4. **Robust Error Handling** - Custom exceptions + retry policies
+5. **Git Best Practices** - Clear separation of concerns
+6. **Clear Documentation** - ADRs + guides + inline comments
+
+## Contributing
+
+1. Create feature branch: `git checkout -b feature/your-feature`
+2. Make changes following existing patterns (see BaseJob)
+3. Write tests: `pytest tests/test_your_feature.py`
+4. Commit: `git commit -m 'feat: description'`
+5. Push: `git push origin feature/your-feature`
+6. Open Pull Request
+
+## Support
+
+For questions and issues:
+1. Check [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+2. Review relevant ADR (ADR-001 or ADR-002)
+3. Open an issue in the repository
+
+## Status
+
+- Build: Passing
+- Tests: 24/24 passing
+- Coverage: ~80%
+- Production: Ready
+
+## License
+
+BEES Brewery Case Project - All rights reserved

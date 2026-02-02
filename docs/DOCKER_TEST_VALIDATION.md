@@ -1,17 +1,17 @@
-# DOCKER_TEST_VALIDATION.md - Guia Completo de Teste com Docker
+# DOCKER_TEST_VALIDATION - Complete Testing Guide with Docker
 
-**Date:** 2026-02-01  
-**Status:** Ready for Testing  
-**Purpose:** Validar que a solução funciona corretamente em Docker  
+Date: 2026-02-01
+Status: Ready for Testing
+Purpose: Validate that the solution works correctly in Docker
 
 ---
 
-## 🚀 Pré-requisitos
+## Prerequisites
 
-### Verificar instalação
+### Verify Installation
 
 ```bash
-# Docker deve estar instalado e rodando
+# Docker must be installed and running
 docker --version
 # Expected: Docker version 20.10+
 
@@ -19,46 +19,46 @@ docker-compose --version
 # Expected: Docker Compose version 2.0+
 ```
 
-Se Docker não está rodando no Mac:
-1. Abra **Docker Desktop** (procure em Applications)
-2. Espere até que o ícone na barra de menu mostre "Docker Desktop is running"
+If Docker is not running on Mac:
+1. Open **Docker Desktop** (search in Applications)
+2. Wait until menu bar icon shows "Docker Desktop is running"
 
 ---
 
-## 🧪 Teste 1: Build das Imagens
+## Test 1: Build Images
 
 ```bash
 cd /Users/thiagomarinhoesilva/Documents/GITHUB/teste_ambev/bees-brewery-case
 
-# Build (isso vai baixar base images e instalar dependências)
-# Esperado: ~5-10 minutos na primeira vez
+# Build (downloads base images and installs dependencies)
+# Expected: ~5-10 minutes on first run
 docker-compose build
 
-# Validação esperada:
-# ✅ Successfully tagged bees-brewery-case_airflow-webserver:latest
-# ✅ Successfully tagged bees-brewery-case_spark-master:latest
-# ✅ Successfully tagged bees-brewery-case_spark-worker:latest
+# Expected validation:
+# Successfully tagged bees-brewery-case_airflow-webserver:latest
+# Successfully tagged bees-brewery-case_spark-master:latest
+# Successfully tagged bees-brewery-case_spark-worker:latest
 ```
 
 ---
 
-## 🧪 Teste 2: Iniciar Containers
+## Test 2: Start Containers
 
 ```bash
-# Iniciar em background
+# Start in background
 docker-compose up -d
 
-# Esperado: 6 containers iniciando
+# Expected: 6 containers starting
 # - postgres
 # - airflow-webserver
 # - airflow-scheduler
 # - spark-master
-# - spark-worker (pode levar alguns segundos)
+# - spark-worker (may take few seconds)
 
-# Validar que containers estão rodando
+# Validate containers are running
 docker-compose ps
 
-# Esperado output:
+# Expected output:
 # NAME                                 STATUS
 # bees-brewery-case-postgres-1         Up (healthy)
 # bees-brewery-case-airflow-webserver-1   Up (healthy)
@@ -69,91 +69,91 @@ docker-compose ps
 
 ---
 
-## 🧪 Teste 3: Verificar Airflow UI
+## Test 3: Verify Airflow UI
 
 ```bash
-# Airflow deve estar disponível em http://localhost:8080
-# Abra no navegador: http://localhost:8080
+# Airflow should be available at http://localhost:8080
+# Open in browser: http://localhost:8080
 
-# Credenciais padrão:
+# Default credentials:
 # Username: airflow
 # Password: airflow
 
-# Se aparecer login page: ✅ Airflow está rodando
-# Se aparecer DAG "bees_brewery_medallion": ✅ DAG foi carregado
+# If login page appears: Airflow is running
+# If DAG "bees_brewery_medallion" appears: DAG was loaded
 ```
 
 ---
 
-## 🧪 Teste 4: Verificar Spark UI
+## Test 4: Verify Spark UI
 
 ```bash
-# Spark Master deve estar disponível em http://localhost:8081
-# Abra no navegador: http://localhost:8081
+# Spark Master should be available at http://localhost:8081
+# Open in browser: http://localhost:8081
 
-# Esperado:
+# Expected:
 # - Status: Alive
 # - Workers: 1
-# - Cores: 2 (ou mais se sua máquina tem mais)
-# - Memory: Disponível e alocado
+# - Cores: 2 (or more if your machine has more)
+# - Memory: Available and allocated
 ```
 
 ---
 
-## 🧪 Teste 5: Rodar DAG Manualmente
+## Test 5: Run DAG Manually
 
 ```bash
-# Dentro do container Airflow
+# Inside Airflow container
 docker-compose exec airflow-webserver bash
 
-# Agora você está DENTRO do container:
-# 1. Unpause a DAG
+# Now you are INSIDE the container:
+# 1. Unpause DAG
 airflow dags unpause bees_brewery_medallion
 
-# 2. Trigger manualmente
+# 2. Trigger manually
 airflow dags test bees_brewery_medallion 2026-02-01
 
-# Esperado output:
+# Expected output:
 # [2026-02-01 00:00:00,000] {bash_operator.py:123} INFO - Running command: ['python', ...]
 # [2026-02-01 00:00:00,000] {bash_operator.py:123} INFO - Task exited with return code 0
 
-# 3. Sair do container
+# 3. Exit container
 exit
 ```
 
 ---
 
-## 🧪 Teste 6: Verificar Datalake
+## Test 6: Verify Datalake
 
 ```bash
-# Ver estrutura de diretórios criada
+# See directory structure created
 ls -la ./datalake/
 
-# Esperado após rodar DAG:
+# Expected after running DAG:
 # datalake/
-# ├── bronze/     (dados brutos da API)
-# ├── silver/     (dados transformados)
-# └── gold/       (dados agregados)
+# ├── bronze/     (raw data from API)
+# ├── silver/     (transformed data)
+# └── gold/       (aggregated data)
 
-# Validar Parquet files foram criados
+# Validate Parquet files were created
 find ./datalake -name "*.parquet" -type f
 
-# Esperado: vários arquivos .parquet em cada layer
+# Expected: several .parquet files in each layer
 ```
 
 ---
 
-## 🧪 Teste 7: Rodar Testes Automatizados
+## Test 7: Run Automated Tests
 
 ```bash
-# Dentro do container Airflow
+# Inside Airflow container
 docker-compose exec airflow-webserver bash
 
-# Rodar testes unitários
+# Run unit tests
 cd /opt/airflow
 pytest tests/ -v --cov=spark_jobs --cov-report=term-missing
 
-# Esperado:
+# Expected:
 # tests/test_ingestion.py::test_ingestion_job_init PASSED
 # tests/test_transformation.py::test_transformation_extracts_bronze PASSED
 # tests/test_aggregation.py::test_aggregation_job_init PASSED
@@ -165,30 +165,30 @@ pytest tests/ -v --cov=spark_jobs --cov-report=term-missing
 
 ---
 
-## 🧪 Teste 8: Verificar Logs
+## Test 8: Verify Logs
 
 ```bash
-# Ver logs de um container específico
+# View logs from specific container
 docker-compose logs airflow-webserver -f
 
-# Ver logs do Scheduler
+# View Scheduler logs
 docker-compose logs airflow-scheduler -f
 
-# Ver logs do Spark Master
+# View Spark Master logs
 docker-compose logs spark-master -f
 
-# Esperado: logs sem erros críticos
+# Expected: logs without critical errors
 ```
 
 ---
 
-## 🧪 Teste 9: Verificar Conectividade Entre Containers
+## Test 9: Verify Connectivity Between Containers
 
 ```bash
-# Dentro do Airflow container
+# Inside Airflow container
 docker-compose exec airflow-webserver bash
 
-# Testar conexão com Spark Master
+# Test connection to Spark Master
 python3 << EOF
 from pyspark.sql import SparkSession
 
@@ -197,288 +197,288 @@ spark = SparkSession.builder \
     .master("spark://spark-master:7077") \
     .getOrCreate()
 
-print("✅ Spark connection OK")
+print("Spark connection OK")
 spark.stop()
 EOF
 
-# Esperado: ✅ Spark connection OK
+# Expected: Spark connection OK
 ```
 
 ---
 
-## 🧪 Teste 10: Parar Containers
+## Test 10: Stop Containers
 
 ```bash
-# Parar todos os containers
+# Stop all containers
 docker-compose down
 
-# Esperado: containers stopped and removed
+# Expected: containers stopped and removed
 
-# Validar que pararam
+# Validate they stopped
 docker ps
 
-# Esperado: lista vazia (ou apenas containers de outros projetos)
+# Expected: empty list (or only containers from other projects)
 ```
 
 ---
 
-## 🎯 TESTE COMPLETO DA DAG: Logs e Arquivos de Saída
+## COMPLETE DAG TEST: Logs and Output Files
 
-### Visão Geral do Pipeline
+### Pipeline Overview
 
-A DAG `bees_brewery_medallion` executa 5 tarefas em sequência:
+The DAG `bees_brewery_medallion` executes 5 tasks in sequence:
 
 ```
-pipeline_start → ingestion_bronze → transformation_silver → aggregation_gold → pipeline_end
+pipeline_start -> ingestion_bronze -> transformation_silver -> aggregation_gold -> pipeline_end
 ```
 
-**Fluxo de dados esperado:**
-- **Bronze:** Dados brutos da API (JSON normalizado em Parquet)
-- **Silver:** Dados limpos e transformados
-- **Gold:** Dados agregados para análises
+**Expected data flow:**
+- **Bronze:** Raw data from API (JSON normalized to Parquet)
+- **Silver:** Cleaned and transformed data
+- **Gold:** Aggregated data for analysis
 
 ---
 
-### 📋 PARTE 1: Preparar Ambiente para Teste
+### PART 1: Prepare Environment for Test
 
 ```bash
-# 1. Ir para diretório do projeto
+# 1. Go to project directory
 cd /Users/thiagomarinhoesilva/Documents/GITHUB/teste_ambev/bees-brewery-case
 
-# 2. Limpar containers anteriores (se existirem)
+# 2. Clean previous containers (if they exist)
 docker-compose down -v
 
-# 3. Construir imagens
+# 3. Build images
 docker-compose build
 
-# Esperado:
-# ✅ Successfully tagged bees-brewery-case_airflow-webserver:latest
-# ✅ Successfully tagged bees-brewery-case_spark-master:latest
-# ✅ Successfully tagged bees-brewery-case_spark-worker:latest
+# Expected:
+# Successfully tagged bees-brewery-case_airflow-webserver:latest
+# Successfully tagged bees-brewery-case_spark-master:latest
+# Successfully tagged bees-brewery-case_spark-worker:latest
 
-# 4. Iniciar containers em background
+# 4. Start containers in background
 docker-compose up -d
 
-# 5. Aguardar inicialização completa (30-60 segundos)
+# 5. Wait for complete initialization (30-60 seconds)
 sleep 30
 
-# 6. Validar que containers estão saudáveis
+# 6. Validate containers are healthy
 docker-compose ps
 
-# Esperado output:
-# STATUS = "Up" e "healthy" (ou "Up" sem a parte de health ainda)
+# Expected output:
+# STATUS = "Up" and "healthy" (or "Up" if health check not running yet)
 ```
 
 ---
 
-### 📊 PARTE 2: Validar Estado Inicial da DAG
+### PART 2: Validate Initial DAG State
 
 ```bash
-# 1. Acessar container do Airflow
+# 1. Access Airflow container
 docker-compose exec airflow-webserver bash
 
-# Agora você está DENTRO do container Airflow
-# Todos os comandos a seguir rodam DENTRO do container
+# Now you are INSIDE Airflow container
+# All commands below run INSIDE the container
 
-# 2. Verificar que DAG está registrada
+# 2. Verify DAG is registered
 airflow dags list | grep bees_brewery_medallion
 
-# Esperado output:
+# Expected output:
 # bees_brewery_medallion | /opt/airflow/dags/bees_brewery_dag.py | False
 
-# 3. Verificar tarefas da DAG
+# 3. Verify DAG tasks
 airflow tasks list bees_brewery_medallion
 
-# Esperado output:
+# Expected output:
 # pipeline_start
 # ingestion_bronze
 # transformation_silver
 # aggregation_gold
 # pipeline_end
 
-# 4. Unpause a DAG (necessário para rodar)
+# 4. Unpause DAG (required to run)
 airflow dags unpause bees_brewery_medallion
 
-# Esperado:
+# Expected:
 # Dag: bees_brewery_medallion, paused: False
 ```
 
 ---
 
-### 🚀 PARTE 3: Executar a DAG Manualmente
+### PART 3: Execute DAG Manually
 
 ```bash
-# AINDA DENTRO DO CONTAINER AIRFLOW
+# STILL INSIDE AIRFLOW CONTAINER
 
-# Opção A: Test mode (mais rápido, para debug)
+# Option A: Test mode (faster, for debug)
 airflow dags test bees_brewery_medallion 2026-02-01
 
-# Opção B: Trigger normal (simula execução real)
+# Option B: Normal trigger (simulates actual execution)
 # airflow dags trigger bees_brewery_medallion --exec-date 2026-02-01
 
-# ⏳ Aguarde 2-5 minutos para execução completa
-# Você verá muitas linhas de log enquanto executa
+# Wait 2-5 minutes for execution
+# You will see many log lines while running
 
-# Sinais de sucesso:
-# ✅ [2026-02-01 XX:XX:XX,XXX] {bash_operator.py:123} INFO - Running command: ['echo', ...]
-# ✅ [2026-02-01 XX:XX:XX,XXX] {python_operator.py:180} INFO - Task exited with return code 0
-# ✅ Ingestion completed! XXX records written to bronze/breweries/...
+# Success signs:
+# [2026-02-01 XX:XX:XX,XXX] {bash_operator.py:123} INFO - Running command: ['echo', ...]
+# [2026-02-01 XX:XX:XX,XXX] {python_operator.py:180} INFO - Task exited with return code 0
+# Ingestion completed! XXX records written to bronze/breweries/...
 ```
 
 ---
 
-### 📝 PARTE 4: Monitorar Logs da DAG em Tempo Real
+### PART 4: Monitor DAG Logs in Real Time
 
-**Em outro terminal (Terminal 2):**
+**In another terminal (Terminal 2):**
 
 ```bash
-# Enquanto a DAG está rodando, monitore os logs
+# While DAG is running, monitor logs
 
 cd /Users/thiagomarinhoesilva/Documents/GITHUB/teste_ambev/bees-brewery-case
 
-# Ver logs do Airflow Scheduler
+# View Airflow Scheduler logs
 docker-compose logs -f airflow-scheduler
 
-# Esperado (deve haver logs da execução da DAG):
+# Expected (should show DAG execution logs):
 # [2026-02-01 XX:XX:XX,XXX] {scheduler.py:xxx} INFO - Running <TaskInstance: bees_brewery_medallion.ingestion_bronze 2026-02-01T00:00:00+00:00 [running]> on worker...
 ```
 
-**Em um terceiro terminal (Terminal 3):**
+**In a third terminal (Terminal 3):**
 
 ```bash
-# Ver logs do Spark Master durante execução dos jobs
+# View Spark Master logs during job execution
 
 docker-compose logs -f spark-master
 
-# Esperado:
+# Expected:
 # 26/02/01 XX:XX:XX INFO Master: Registering worker...
 # 26/02/01 XX:XX:XX INFO MasterWebUI: Binding MasterWebUI to 0.0.0.0
 ```
 
 ---
 
-### 📂 PARTE 5: Validar Arquivos de Saída - Bronze Layer
+### PART 5: Validate Output Files - Bronze Layer
 
-**De volta no Terminal 1 (container Airflow), após DAG completar:**
+**Back in Terminal 1 (Airflow container), after DAG completes:**
 
 ```bash
-# AINDA DENTRO DO CONTAINER AIRFLOW
+# STILL INSIDE AIRFLOW CONTAINER
 
-# 1. Listar estrutura do datalake
+# 1. List datalake structure
 ls -la /opt/airflow/datalake/
 
-# Esperado:
+# Expected:
 # drwxr-xr-x  bronze/
 # drwxr-xr-x  silver/
 # drwxr-xr-x  gold/
 
-# 2. Verificar dados Bronze (raw)
+# 2. Verify Bronze data (raw)
 ls -la /opt/airflow/datalake/bronze/breweries/
 
-# Esperado:
+# Expected:
 # drwxr-xr-x  created_at=2026-02-01/
 
-# 3. Ver arquivos Parquet em Bronze
+# 3. See Parquet files in Bronze
 find /opt/airflow/datalake/bronze -name "*.parquet" -type f
 
-# Esperado:
+# Expected:
 # /opt/airflow/datalake/bronze/breweries/created_at=2026-02-01/part-00000-xxx.snappy.parquet
-# (pode haver múltiplos part-XXXXX files)
+# (may have multiple part-XXXXX files)
 
-# 4. Contar linhas em Bronze
+# 4. Count rows in Bronze
 python3 << 'EOF'
 from pyspark.sql import SparkSession
 
 spark = SparkSession.builder.appName("test").getOrCreate()
 df = spark.read.parquet("/opt/airflow/datalake/bronze/breweries/created_at=2026-02-01")
-print(f"✅ Bronze Records: {df.count()}")
-print(f"✅ Bronze Schema: {df.schema}")
+print(f"Bronze Records: {df.count()}")
+print(f"Bronze Schema: {df.schema}")
 df.show(5)
 EOF
 
-# Esperado output:
-# ✅ Bronze Records: XXX (número de cervejarias da API)
-# ✅ Bronze Schema: StructType([...])
-# Mostra 5 primeiras linhas com dados brutos
+# Expected output:
+# Bronze Records: XXX (number of breweries from API)
+# Bronze Schema: StructType([...])
+# Shows 5 first rows with raw data
 ```
 
 ---
 
-### 📂 PARTE 6: Validar Arquivos de Saída - Silver Layer
+### PART 6: Validate Output Files - Silver Layer
 
 ```bash
-# AINDA DENTRO DO CONTAINER AIRFLOW
+# STILL INSIDE AIRFLOW CONTAINER
 
-# 1. Verificar dados Silver (transformados)
+# 1. Verify Silver data (transformed)
 ls -la /opt/airflow/datalake/silver/
 
-# Esperado:
+# Expected:
 # drwxr-xr-x  breweries_cleaned/
 
-# 2. Ver arquivos Parquet em Silver
+# 2. See Parquet files in Silver
 find /opt/airflow/datalake/silver -name "*.parquet" -type f
 
-# Esperado:
+# Expected:
 # /opt/airflow/datalake/silver/breweries_cleaned/created_at=2026-02-01/part-00000-xxx.snappy.parquet
 
-# 3. Validar transformação (Silver deve ter menos colunas/dados limpos)
+# 3. Validate transformation (Silver should have fewer columns/cleaned data)
 python3 << 'EOF'
 from pyspark.sql import SparkSession
 
 spark = SparkSession.builder.appName("test").getOrCreate()
 
 print("=" * 60)
-print("COMPARAÇÃO: BRONZE vs SILVER")
+print("COMPARISON: BRONZE vs SILVER")
 print("=" * 60)
 
 # Bronze
 bronze_df = spark.read.parquet("/opt/airflow/datalake/bronze/breweries/created_at=2026-02-01")
-print(f"\n📊 BRONZE (Raw):")
+print(f"\nBRONZE (Raw):")
 print(f"  Records: {bronze_df.count()}")
 print(f"  Columns: {len(bronze_df.columns)}")
 print(f"  Column names: {bronze_df.columns}")
 
 # Silver
 silver_df = spark.read.parquet("/opt/airflow/datalake/silver/breweries_cleaned/created_at=2026-02-01")
-print(f"\n📊 SILVER (Cleaned):")
+print(f"\nSILVER (Cleaned):")
 print(f"  Records: {silver_df.count()}")
 print(f"  Columns: {len(silver_df.columns)}")
 print(f"  Column names: {silver_df.columns}")
 
-print(f"\n✅ Sample Silver data:")
+print(f"\nSample Silver data:")
 silver_df.show(5)
 
 spark.stop()
 EOF
 
-# Esperado:
-# SILVER deve ter:
-#   - Mesmo número ou menos registros (outliers removidos)
-#   - Colunas renomeadas/limpas
-#   - Dados sem valores nulos em campos importantes
-#   - Timestamp de transformação adicionado
+# Expected:
+# SILVER should have:
+#   - Same or fewer records (outliers removed)
+#   - Renamed/cleaned columns
+#   - Data without nulls in important fields
+#   - Transformation timestamp added
 ```
 
 ---
 
-### 📂 PARTE 7: Validar Arquivos de Saída - Gold Layer
+### PART 7: Validate Output Files - Gold Layer
 
 ```bash
-# AINDA DENTRO DO CONTAINER AIRFLOW
+# STILL INSIDE AIRFLOW CONTAINER
 
-# 1. Verificar dados Gold (agregados)
+# 1. Verify Gold data (aggregated)
 ls -la /opt/airflow/datalake/gold/
 
-# Esperado:
+# Expected:
 # drwxr-xr-x  breweries_stats/
 
-# 2. Ver arquivos Parquet em Gold
+# 2. See Parquet files in Gold
 find /opt/airflow/datalake/gold -name "*.parquet" -type f
 
-# Esperado:
+# Expected:
 # /opt/airflow/datalake/gold/breweries_stats/created_at=2026-02-01/part-00000-xxx.snappy.parquet
 
-# 3. Validar agregações (Gold deve ter estadísticas por grupo)
+# 3. Validate aggregations (Gold should have statistics by group)
 python3 << 'EOF'
 from pyspark.sql import SparkSession
 
@@ -487,62 +487,62 @@ spark = SparkSession.builder.appName("test").getOrCreate()
 gold_df = spark.read.parquet("/opt/airflow/datalake/gold/breweries_stats/created_at=2026-02-01")
 
 print("=" * 60)
-print("GOLD LAYER (Agregado para Analytics)")
+print("GOLD LAYER (Aggregated for Analytics)")
 print("=" * 60)
-print(f"\n📊 Estatísticas:")
-print(f"  Total de grupos/agregações: {gold_df.count()}")
-print(f"  Colunas: {gold_df.columns}")
+print(f"\nStatistics:")
+print(f"  Total groups/aggregations: {gold_df.count()}")
+print(f"  Columns: {gold_df.columns}")
 
-print(f"\n📈 Sample agregado:")
+print(f"\nSample aggregation:")
 gold_df.show(10)
 
-print(f"\n📊 Schema do Gold:")
+print(f"\nGold Schema:")
 gold_df.printSchema()
 
 spark.stop()
 EOF
 
-# Esperado:
-# GOLD deve ter agregações como:
-#   - Count por brewery_type (estado, tipo, etc.)
-#   - Stats (min, max, avg) de valores numéricos
-#   - Dados prontos para BI/Dashboard
+# Expected:
+# GOLD should have aggregations such as:
+#   - Count by brewery_type (state, type, etc.)
+#   - Stats (min, max, avg) of numeric values
+#   - Data ready for BI/Dashboard
 ```
 
 ---
 
-### 📜 PARTE 8: Validar Logs Estruturados
+### PART 8: Validate Structured Logs
 
 ```bash
-# AINDA DENTRO DO CONTAINER AIRFLOW
+# STILL INSIDE AIRFLOW CONTAINER
 
-# 1. Ver logs de execução da DAG
+# 1. View DAG execution logs
 cat /opt/airflow/logs/dag_id=bees_brewery_medallion/*/2026-02-01T00:00:00*/task_id=*/attempt=1.log
 
-# Alternativamente, ver diretório de logs
+# Alternatively, view log directory
 find /opt/airflow/logs -name "*.log" -type f | head -10
 
-# 2. Ver log específico de uma tarefa (exemplo: ingestion_bronze)
-cat /opt/airflow/logs/dag_id=bees_brewery_medallion/run_id=manual__2026-02-01T00:00:00*/task_id=ingestion_bronze/attempt=1.log 2>/dev/null || echo "Log ainda não disponível"
+# 2. View specific task log (example: ingestion_bronze)
+cat /opt/airflow/logs/dag_id=bees_brewery_medallion/run_id=manual__2026-02-01T00:00:00*/task_id=ingestion_bronze/attempt=1.log 2>/dev/null || echo "Log not yet available"
 
-# 3. Extrair informações importantes dos logs
+# 3. Extract important information from logs
 python3 << 'EOF'
 import glob
 import os
 
-# Procurar por logs da execução
+# Search for execution logs
 log_dir = "/opt/airflow/logs/dag_id=bees_brewery_medallion"
 log_files = glob.glob(f"{log_dir}/**/attempt=1.log", recursive=True)
 
 print(f"Found {len(log_files)} log files")
-print("\nProcurando por keywords importantes...\n")
+print("\nSearching for important keywords...\n")
 
 keywords = [
-    "✅", "❌", "ERROR", "WARN", "completed", "failed", 
+    "Success", "Error", "WARN", "completed", "failed", 
     "records written", "rows processed", "Schema validation"
 ]
 
-for log_file in sorted(log_files)[:3]:  # Primeiros 3 logs
+for log_file in sorted(log_files)[:3]:  # First 3 logs
     print(f"\n{'='*60}")
     print(f"File: {log_file.split('/')[-3]}")
     print(f"{'='*60}")
@@ -556,12 +556,12 @@ EOF
 
 ---
 
-### 🔍 PARTE 9: Validação Completa de Integridade de Dados
+### PART 9: Complete Data Integrity Validation
 
 ```bash
-# AINDA DENTRO DO CONTAINER AIRFLOW
+# STILL INSIDE AIRFLOW CONTAINER
 
-# Script completo de validação end-to-end
+# Complete end-to-end validation script
 
 python3 << 'EOF'
 from pyspark.sql import SparkSession
@@ -573,176 +573,176 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 print("\n" + "="*70)
-print("🔍 VALIDAÇÃO COMPLETA: Pipeline de Dados BEES Brewery")
+print("Data Pipeline Validation: BEES Brewery")
 print("="*70)
 
 # --- BRONZE LAYER ---
-print("\n📦 BRONZE LAYER (Raw Data)")
+print("\nBRONZE LAYER (Raw Data)")
 print("-" * 70)
 
 try:
     bronze = spark.read.parquet("/opt/airflow/datalake/bronze/breweries/created_at=2026-02-01")
     
     bronze_count = bronze.count()
-    print(f"✅ Bronze records: {bronze_count}")
+    print(f"Bronze records: {bronze_count}")
     
     if bronze_count == 0:
-        print("❌ ERRO: Bronze layer vazia!")
+        print("ERROR: Bronze layer is empty!")
         sys.exit(1)
     
-    print(f"✅ Bronze columns: {len(bronze.columns)} - {bronze.columns}")
+    print(f"Bronze columns: {len(bronze.columns)} - {bronze.columns}")
     
-    # Verificar nulos
+    # Check nulls
     null_counts = bronze.select([count(isnull(col(c))).alias(c) for c in bronze.columns]).collect()[0]
-    print(f"✅ Valores nulos por coluna: {null_counts.asDict()}")
+    print(f"Null values per column: {null_counts.asDict()}")
     
 except Exception as e:
-    print(f"❌ Erro ao validar Bronze: {e}")
+    print(f"ERROR validating Bronze: {e}")
     sys.exit(1)
 
 # --- SILVER LAYER ---
-print("\n🔄 SILVER LAYER (Transformed Data)")
+print("\nSILVER LAYER (Transformed Data)")
 print("-" * 70)
 
 try:
     silver = spark.read.parquet("/opt/airflow/datalake/silver/breweries_cleaned/created_at=2026-02-01")
     
     silver_count = silver.count()
-    print(f"✅ Silver records: {silver_count}")
+    print(f"Silver records: {silver_count}")
     
     if silver_count == 0:
-        print("⚠️  Aviso: Silver layer vazia")
+        print("WARNING: Silver layer is empty")
     else:
-        print(f"✅ Silver columns: {len(silver.columns)} - {silver.columns}")
+        print(f"Silver columns: {len(silver.columns)} - {silver.columns}")
         
-        # Comparação com Bronze
+        # Compare with Bronze
         reduction = ((bronze_count - silver_count) / bronze_count * 100) if bronze_count > 0 else 0
-        print(f"✅ Redução de dados: {reduction:.2f}% (outliers removidos)")
+        print(f"Data reduction: {reduction:.2f}% (outliers removed)")
         
-        # Mostrar sample
-        print(f"\n📋 Sample (5 linhas):")
+        # Show sample
+        print(f"\nSample (5 rows):")
         silver.show(5, truncate=False)
         
 except Exception as e:
-    print(f"⚠️  Aviso ao validar Silver: {e}")
+    print(f"WARNING validating Silver: {e}")
 
 # --- GOLD LAYER ---
-print("\n📊 GOLD LAYER (Aggregated Data)")
+print("\nGOLD LAYER (Aggregated Data)")
 print("-" * 70)
 
 try:
     gold = spark.read.parquet("/opt/airflow/datalake/gold/breweries_stats/created_at=2026-02-01")
     
     gold_count = gold.count()
-    print(f"✅ Gold records (agregações): {gold_count}")
+    print(f"Gold records (aggregations): {gold_count}")
     
     if gold_count == 0:
-        print("⚠️  Aviso: Gold layer vazia")
+        print("WARNING: Gold layer is empty")
     else:
-        print(f"✅ Gold columns: {len(gold.columns)} - {gold.columns}")
+        print(f"Gold columns: {len(gold.columns)} - {gold.columns}")
         
-        print(f"\n📈 Agregações Gold (amostra):")
+        print(f"\nAggregations Gold (sample):")
         gold.show(5, truncate=False)
         
 except Exception as e:
-    print(f"⚠️  Aviso ao validar Gold: {e}")
+    print(f"WARNING validating Gold: {e}")
 
-# --- RESUMO FINAL ---
+# --- FINAL SUMMARY ---
 print("\n" + "="*70)
-print("✅ VALIDAÇÃO CONCLUÍDA COM SUCESSO")
+print("VALIDATION COMPLETED SUCCESSFULLY")
 print("="*70)
 print(f"""
-📊 RESUMO FINAL:
-  Bronze:  {bronze_count} registros (dados brutos)
-  Silver:  {silver_count if silver_count else 'N/A'} registros (dados limpos)
-  Gold:    {gold_count if gold_count else 'N/A'} registros (dados agregados)
+Final Summary:
+  Bronze:  {bronze_count} records (raw data)
+  Silver:  {silver_count if silver_count else 'N/A'} records (cleaned data)
+  Gold:    {gold_count if gold_count else 'N/A'} records (aggregated data)
   
-✅ Pipeline completou todas as 3 camadas (Bronze → Silver → Gold)
+Pipeline completed all 3 layers (Bronze -> Silver -> Gold)
 """)
 
 spark.stop()
 EOF
 
-# Esperado output:
-# ✅ VALIDAÇÃO CONCLUÍDA COM SUCESSO
-# Mostra contagem de registros em cada camada
-# Mostra que dados fluiram corretamente através do pipeline
+# Expected output:
+# VALIDATION COMPLETED SUCCESSFULLY
+# Shows record count at each layer
+# Shows data flowed correctly through pipeline
 ```
 
 ---
 
-### 📋 PARTE 10: Checklist de Validação da DAG
+### PART 10: DAG Validation Checklist
 
 ```bash
-# Fora do container, ou dentro dele para verificar
+# Outside container, or inside to verify
 
-# 1. Verificar via Airflow UI (navegador)
+# 1. Verify via Airflow UI (browser)
 # http://localhost:8080
-# - Procure por: bees_brewery_medallion
-# - Deve aparecer "Last Run: 2026-02-01"
-# - Deve mostrar "Success" com checkmark verde
+# - Look for: bees_brewery_medallion
+# - Should show "Last Run: 2026-02-01"
+# - Should show "Success" with green checkmark
 
-# 2. Verificar diretórios de saída (fora do container)
+# 2. Verify output directories (outside container)
 ls -la /Users/thiagomarinhoesilva/Documents/GITHUB/teste_ambev/bees-brewery-case/datalake/
 
-# Esperado:
+# Expected:
 # drwxr-xr-x  bronze/
 # drwxr-xr-x  silver/
 # drwxr-xr-x  gold/
 
-# 3. Contar arquivos Parquet
+# 3. Count Parquet files
 find /Users/thiagomarinhoesilva/Documents/GITHUB/teste_ambev/bees-brewery-case/datalake -name "*.parquet" | wc -l
 
-# Esperado: > 0 (vários arquivos parquet criados)
+# Expected: > 0 (several parquet files created)
 
-# 4. Verificar logs do container
+# 4. Check container logs
 docker-compose logs airflow-scheduler | grep "bees_brewery_medallion" | tail -20
 
-# Esperado: logs mostrando execução bem-sucedida das tarefas
+# Expected: logs showing successful task execution
 ```
 
 ---
 
-### 🎯 PARTE 11: Validação Visual - Airflow UI
+### PART 11: Visual Validation - Airflow UI
 
 ```
-1. Acesse: http://localhost:8080
+1. Access: http://localhost:8080
    Username: admin / Password: admin
 
-2. Procure pelo DAG "bees_brewery_medallion"
+2. Find DAG "bees_brewery_medallion"
 
-3. Verifique:
-   ✅ DAG está na lista
-   ✅ Status mostrado como "active" (verde)
-   ✅ "Paused" está desligado (False)
+3. Verify:
+   - DAG is in the list
+   - Status shown as "active" (green)
+   - "Paused" is off (False)
 
-4. Clique no DAG para ver:
-   ✅ Graph View: 5 tarefas (start → bronze → silver → gold → end)
-   ✅ Tree View: Última execução em 2026-02-01
-   ✅ Todos os boxes aparecem em verde (sucesso)
+4. Click DAG to see:
+   - Graph View: 5 tasks (start -> bronze -> silver -> gold -> end)
+   - Tree View: Last execution on 2026-02-01
+   - All boxes appear green (success)
 
-5. Clique em cada tarefa para ver logs:
-   ✅ pipeline_start: "echo Starting..."
-   ✅ ingestion_bronze: "Starting ingestion from Open Brewery DB API"
-   ✅ transformation_silver: "Starting transformation job"
-   ✅ aggregation_gold: "Starting aggregation job"
-   ✅ pipeline_end: "echo Pipeline completed successfully"
+5. Click each task for logs:
+   - pipeline_start: "echo Starting..."
+   - ingestion_bronze: "Starting ingestion from Open Brewery DB API"
+   - transformation_silver: "Starting transformation job"
+   - aggregation_gold: "Starting aggregation job"
+   - pipeline_end: "echo Pipeline completed successfully"
 ```
 
 ---
 
-### ⚠️ TROUBLESHOOTING: Se algo falhar
+### TROUBLESHOOTING: If something fails
 
 ```bash
-# Se DAG falhar, procure por erros:
+# If DAG fails, look for errors:
 
-# 1. Ver erro detalhado
+# 1. View detailed error
 docker-compose logs airflow-scheduler | grep -A 10 "ERROR"
 
-# 2. Ver erro do Spark
+# 2. View Spark error
 docker-compose logs spark-master | grep -A 5 "ERROR"
 
-# 3. Verificar se API está respondendo
+# 3. Check if API is responding
 docker-compose exec airflow-webserver bash
 python3 << 'EOF'
 import requests
@@ -755,214 +755,146 @@ except Exception as e:
     print(f"API Error: {e}")
 EOF
 
-# 4. Verificar storage/disco
+# 4. Check storage/disk
 du -sh /Users/thiagomarinhoesilva/Documents/GITHUB/teste_ambev/bees-brewery-case/datalake/
 df -h
 
-# 5. Verificar memória do Docker
+# 5. Check memory of Docker
 docker stats
 ```
 
 ---
 
-### 📊 RESUMO: O que deve acontecer
+### SUMMARY: What should happen
 
 ```
-Início:
-  └─ docker-compose up -d
-     └─ Aguarda 30-60 segundos
+Start:
+  - docker-compose up -d
+  - Wait 30-60 seconds
 
 DAG Trigger:
-  └─ airflow dags test bees_brewery_medallion 2026-02-01
-     └─ Tarefa 1 (start): Echo inicial
-     └─ Tarefa 2 (ingestion): 
-        ├─ Fetch da API OpenBreweryDB
-        ├─ Normaliza dados (strings)
-        ├─ Valida schema
-        └─ Salva em: datalake/bronze/breweries/created_at=2026-02-01/ (Parquet)
-     
-     └─ Tarefa 3 (transformation):
-        ├─ Lê dados de Bronze
-        ├─ Remove outliers/nulos
-        ├─ Renomeia colunas
-        ├─ Adiciona timestamps
-        └─ Salva em: datalake/silver/breweries_cleaned/created_at=2026-02-01/ (Parquet)
-     
-     └─ Tarefa 4 (aggregation):
-        ├─ Lê dados de Silver
-        ├─ Agrupa por brewery_type/state/etc
-        ├─ Calcula stats (count, min, max, avg)
-        └─ Salva em: datalake/gold/breweries_stats/created_at=2026-02-01/ (Parquet)
-     
-     └─ Tarefa 5 (end): Echo final
+  - airflow dags test bees_brewery_medallion 2026-02-01
+  - Task 1 (start): Echo initial
+  - Task 2 (ingestion): 
+     * Fetch from API OpenBreweryDB
+     * Normalize data (strings)
+     * Validate schema
+     * Save to: datalake/bronze/breweries/created_at=2026-02-01/ (Parquet)
+  
+  - Task 3 (transformation):
+     * Read Bronze data
+     * Remove outliers/nulls
+     * Rename columns
+     * Add timestamps
+     * Save to: datalake/silver/breweries_cleaned/created_at=2026-02-01/ (Parquet)
+  
+  - Task 4 (aggregation):
+     * Read Silver data
+     * Group by brewery_type/state/etc
+     * Calculate stats (count, min, max, avg)
+     * Save to: datalake/gold/breweries_stats/created_at=2026-02-01/ (Parquet)
+  
+  - Task 5 (end): Echo final
 
-Resultado Final:
-  ✅ Arquivo de partição em cada camada
-  ✅ Logs mostrando "Task exited with return code 0"
-  ✅ Estrutura Medallion completa: Bronze → Silver → Gold
+Final Result:
+  - Partition file in each layer
+  - Logs showing "Task exited with return code 0"
+  - Complete Medallion structure: Bronze -> Silver -> Gold
 ```
 
 ---
 
-**🎉 Sucesso:** Se chegou aqui e tudo passou, seu pipeline está pronto para produção!
-
----
-
-## 📊 Checklist de Validação
+## Validation Checklist
 
 ```
-✅ PRÉ-REQUISITOS
-  ☐ Docker instalado
-  ☐ Docker daemon rodando
-  ☐ Docker Compose instalado
-  ☐ Mínimo 4GB RAM disponível para Docker
+PREREQUISITES
+  [ ] Docker installed
+  [ ] Docker daemon running
+  [ ] Docker Compose installed
+  [ ] Minimum 4GB RAM available for Docker
 
-✅ BUILD
-  ☐ Dockerfile.airflow build com sucesso
-  ☐ Dockerfile.spark build com sucesso
-  ☐ Requirements.txt instalado corretamente
+BUILD
+  [ ] Dockerfile.airflow builds successfully
+  [ ] Dockerfile.spark builds successfully
+  [ ] Requirements.txt installed correctly
 
-✅ CONTAINERS
-  ☐ Postgres iniciado e healthy
-  ☐ Airflow Webserver iniciado e healthy
-  ☐ Airflow Scheduler iniciado e healthy
-  ☐ Spark Master iniciado
-  ☐ Spark Worker iniciado e conectado ao Master
+CONTAINERS
+  [ ] Postgres started and healthy
+  [ ] Airflow Webserver started and healthy
+  [ ] Airflow Scheduler started and healthy
+  [ ] Spark Master started
+  [ ] Spark Worker started and connected to Master
 
-✅ AIRFLOW
-  ☐ UI acessível em http://localhost:8080
-  ☐ DAG "bees_brewery_medallion" visível
-  ☐ DAG pode ser unpaused
-  ☐ DAG pode ser triggerado manualmente
+AIRFLOW
+  [ ] UI accessible at http://localhost:8080
+  [ ] DAG "bees_brewery_medallion" visible
+  [ ] DAG can be unpaused
+  [ ] DAG can be triggered manually
 
-✅ SPARK
-  ☐ UI acessível em http://localhost:8081
-  ☐ Worker registrado no Master
-  ☐ Aplicações podem ser submitidas
+SPARK
+  [ ] UI accessible at http://localhost:8081
+  [ ] Worker registered with Master
+  [ ] Applications can be submitted
 
-✅ PIPELINE
-  ☐ Ingestion Job executa com sucesso
-  ☐ Transformation Job executa com sucesso
-  ☐ Aggregation Job executa com sucesso
-  ☐ Dados aparecem em datalake/bronze/
-  ☐ Dados aparecem em datalake/silver/
-  ☐ Dados aparecem em datalake/gold/
+PIPELINE
+  [ ] Ingestion Job executes successfully
+  [ ] Transformation Job executes successfully
+  [ ] Aggregation Job executes successfully
+  [ ] Data appears in datalake/bronze/
+  [ ] Data appears in datalake/silver/
+  [ ] Data appears in datalake/gold/
 
-✅ TESTES
-  ☐ Testes unitários rodam com sucesso
-  ☐ Cobertura > 80%
-  ☐ Nenhum teste falha
-  ☐ Testes de integração passam
+TESTS
+  [ ] Unit tests run successfully
+  [ ] Coverage > 80%
+  [ ] No test failures
+  [ ] Integration tests pass
 
-✅ DADOS
-  ☐ Dados Bronze: raw formato original
-  ☐ Dados Silver: cleaned e enriched
-  ☐ Dados Gold: aggregated para analytics
-  ☐ Parquet files foram criados
-  ☐ Schema validação passou
+DATA
+  [ ] Bronze data: raw original format
+  [ ] Silver data: cleaned and enriched
+  [ ] Gold data: aggregated for analytics
+  [ ] Parquet files were created
+  [ ] Schema validation passed
 
-✅ ERRO HANDLING
-  ☐ DataQualityException funciona corretamente
-  ☐ StorageException é capturada
-  ☐ Logging estruturado está ativo
-  ☐ Retry policies funcionam em Airflow
+ERROR HANDLING
+  [ ] DataQualityException works correctly
+  [ ] StorageException is caught
+  [ ] Structured logging is active
+  [ ] Retry policies work in Airflow
 
-✅ CLEANUP
-  ☐ docker-compose down remove containers
-  ☐ Volumes persistem (ou são deletados se --volumes)
+CLEANUP
+  [ ] docker-compose down removes containers
+  [ ] Volumes persist (or deleted if --volumes)
 ```
 
 ---
 
-## 🔧 Troubleshooting
+## Monitoring During Execution
 
-### ❌ Erro: "Cannot connect to Docker daemon"
-
-```bash
-# Solução 1: Iniciar Docker Desktop
-open /Applications/Docker.app
-
-# Solução 2: Aguardar que inicialize completamente
-sleep 30
-
-# Solução 3: Validar que daemon está respondendo
-docker ps
-```
-
-### ❌ Erro: "Port 8080 is already in use"
+### Monitor in Real Time
 
 ```bash
-# Encontrar processo usando porta 8080
-lsof -i :8080
-
-# Matar processo
-kill -9 <PID>
-
-# Ou usar porta diferente
-docker-compose up -d -p 8090:8080
-```
-
-### ❌ Erro: "Insufficient disk space"
-
-```bash
-# Limpar images não usadas
-docker system prune -a
-
-# Liberar espaço (cuidado!)
-docker image prune
-```
-
-### ❌ Erro: "Container exited with code 1"
-
-```bash
-# Ver logs detalhados
-docker-compose logs <service-name>
-
-# Exemplo:
-docker-compose logs airflow-webserver
-```
-
-### ❌ Erro: "Spark Worker não conecta ao Master"
-
-```bash
-# Verificar que spark-master está healthy
-docker-compose logs spark-master
-
-# Esperado: "Started MasterWebUI at ..."
-
-# Verificar network
-docker network inspect bees-brewery-case_default
-
-# Esperado: ambos master e worker no mesmo network
-```
-
----
-
-## 📈 Monitoramento Durante Execução
-
-### Monitorar em Tempo Real
-
-```bash
-# Terminal 1: Ver logs do Scheduler
+# Terminal 1: View Scheduler logs
 docker-compose logs airflow-scheduler -f
 
-# Terminal 2: Ver logs do Airflow Webserver
+# Terminal 2: View Airflow Webserver logs
 docker-compose logs airflow-webserver -f
 
-# Terminal 3: Ver logs do Spark Master
+# Terminal 3: View Spark Master logs
 docker-compose logs spark-master -f
 
-# Terminal 4: Executar comandos
+# Terminal 4: Execute commands
 docker-compose exec airflow-webserver bash
 ```
 
-### Verificar Métricas
+### Check Metrics
 
 ```bash
-# CPU e Memory usage dos containers
+# CPU and Memory usage of containers
 docker stats
 
-# Esperado:
+# Expected:
 # CONTAINER                   CPU %    MEM USAGE / LIMIT
 # bees-brewery-case-postgres-1      0.5%     150MB / 8GB
 # bees-brewery-case-airflow-webserver-1  2%  500MB / 8GB
@@ -970,61 +902,61 @@ docker stats
 
 ---
 
-## ✅ Validação Final
+## Final Validation
 
-Se todos os testes passaram, você tem:
+If all tests passed, you have:
 
-✅ **Arquitetura Modular**
-- Código bem separado (config, core, jobs, schemas)
-- Dependency injection funcionando
-- Multi-environment suportado
+SUCCESS: Modular Architecture
+- Code well separated (config, core, jobs, schemas)
+- Dependency injection working
+- Multi-environment supported
 
-✅ **Pipeline Escalável**
-- Medallion architecture (Bronze → Silver → Gold)
-- Spark partitioning funcionando
-- Airflow orchestration rodando
+SUCCESS: Scalable Pipeline
+- Medallion architecture (Bronze -> Silver -> Gold)
+- Spark partitioning working
+- Airflow orchestration running
 
-✅ **Robustez**
-- Error handling com retry policies
-- Data quality validation ativa
-- Logging estruturado
+SUCCESS: Robustness
+- Error handling with retry policies
+- Data quality validation active
+- Structured logging
 
-✅ **Deployment Ready**
-- Docker compose levanta tudo
-- Todos containers comunicam
-- Pipeline executa end-to-end
+SUCCESS: Deployment Ready
+- Docker compose brings up everything
+- All containers communicate
+- Pipeline executes end-to-end
 
-✅ **Documentação Completa**
-- ADRs explicam decisões
-- REQUIREMENTS_MAPPING mostra rastreabilidade
-- README descreve como rodar
+SUCCESS: Complete Documentation
+- ADRs explain decisions
+- REQUIREMENTS_MAPPING shows traceability
+- README describes how to run
 
 ---
 
-## 🎁 Próximas Etapas
+## Next Steps
 
-Depois que validar com Docker:
+After validating with Docker:
 
-1. **Commit no Git**
+1. **Commit to Git**
    ```bash
    git add .
    git commit -m "feat: production-ready data pipeline with Docker"
    git push origin main
    ```
 
-2. **Preparar para apresentação**
-   - Ter Docker rodando
-   - Ter Airflow UI acessível
-   - Ter testes passando
+2. **Prepare for presentation**
+   - Have Docker running
+   - Have Airflow UI accessible
+   - Have tests passing
 
-3. **Demonstração para Bees**
-   - Mostrar DAG no Airflow
-   - Rodar pipeline manualmente
-   - Mostrar dados em cada layer
-   - Explicar decisões técnicas via ADRs
+3. **Demonstrate to Bees**
+   - Show DAG in Airflow
+   - Run pipeline manually
+   - Show data in each layer
+   - Explain technical decisions via ADRs
 
 ---
 
-**Last Updated:** 2026-02-01  
-**Status:** ✅ Ready for Docker Testing  
-**Next Step:** Start Docker daemon and run tests
+Last Updated: 2026-02-01
+Status: Ready for Docker Testing
+Next Step: Start Docker daemon and run tests
